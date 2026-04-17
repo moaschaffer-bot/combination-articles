@@ -76,6 +76,25 @@ body {
 }
 .topbar-bell { color: var(--text-3); font-size: 16px; cursor: pointer; }
 
+/* LANGUAGE TOGGLE */
+.lang-toggle {
+  display: flex; align-items: center;
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-pill);
+  padding: 2px;
+  gap: 2px;
+  background: var(--surface2);
+}
+.lang-btn {
+  padding: 3px 10px; font-size: 11px; font-weight: 600;
+  border-radius: var(--radius-pill);
+  color: var(--text-3); cursor: pointer; background: transparent; border: none;
+  font-family: inherit; letter-spacing: .02em;
+  transition: background .15s, color .15s;
+}
+.lang-btn.active { background: var(--purple); color: #fff; }
+.lang-btn:not(.active):hover { color: var(--text-2); }
+
 /* SIDEBAR */
 .sidebar {
   position: fixed; top: var(--topbar-h); left: 0; bottom: 0;
@@ -215,6 +234,15 @@ select.input {
   background: var(--surface); color: var(--text-2);
   border: 1px solid var(--border);
 }
+.price-badge {
+  font-size: 11px; padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--surface); color: var(--text);
+  border: 1px solid var(--border);
+  font-weight: 500;
+}
+.price-badge.empty { color: var(--text-3); font-style: italic; font-weight: 400; }
+
 .chevron { margin-left: auto; font-size: 10px; color: var(--text-3); transition: transform .15s; }
 .chevron.open { transform: rotate(180deg); }
 
@@ -225,6 +253,7 @@ select.input {
   background: var(--surface);
 }
 .pill {
+  display: inline-flex; align-items: center; gap: 4px;
   font-size: 12px; padding: 3px 10px;
   border-radius: var(--radius-pill);
   background: var(--surface2); color: var(--text);
@@ -233,6 +262,69 @@ select.input {
 .pill.default {
   background: var(--purple-light); color: var(--purple);
   border-color: rgba(91,79,207,0.2);
+}
+.pill.interactive { cursor: pointer; transition: background .1s, border-color .1s; }
+.pill.interactive:hover { background: #ECEAF3; border-color: var(--border-md); }
+.pill.default.interactive:hover { background: #E4E0F5; }
+.pill-remove {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; border-radius: 50%;
+  background: transparent; color: inherit;
+  font-size: 14px; line-height: 1; margin-left: 2px; margin-right: -4px;
+  opacity: .55; transition: opacity .1s, background .1s;
+}
+.pill-remove:hover { opacity: 1; background: rgba(0,0,0,0.08); }
+
+/* SELECTED ROW inside expanded body */
+.selected-row {
+  display: flex; flex-wrap: wrap; gap: .375rem;
+  padding-bottom: .75rem; margin-bottom: .75rem;
+  border-bottom: 1px solid var(--border);
+}
+.selected-row.empty {
+  padding: .625rem .75rem;
+  background: var(--surface2);
+  border: 1px dashed var(--border-md);
+  border-radius: var(--radius-sm);
+  border-bottom: 1px dashed var(--border-md);
+  color: var(--text-3);
+  font-size: 12px;
+  margin-bottom: .75rem;
+}
+.selected-label {
+  font-size: 11px; color: var(--text-3); text-transform: uppercase;
+  letter-spacing: .07em; font-weight: 600;
+  width: 100%; margin-bottom: .375rem;
+}
+
+/* PRICE ROW (inside expanded step body) */
+.price-row {
+  display: flex; align-items: center; gap: .75rem;
+  padding-bottom: .875rem;
+  margin-bottom: .875rem;
+  border-bottom: 1px solid var(--border);
+}
+.price-row label {
+  font-size: 12px; color: var(--text-2); font-weight: 500;
+  min-width: 90px;
+}
+.price-input-wrap {
+  position: relative; max-width: 160px;
+}
+.price-input {
+  height: 34px; width: 100%;
+  border: 1px solid var(--border-md); border-radius: var(--radius-sm);
+  padding: 0 36px 0 10px; font-size: 13px; color: var(--text);
+  background: var(--surface); outline: none; font-family: inherit;
+  transition: border-color .15s, box-shadow .15s;
+  -moz-appearance: textfield;
+}
+.price-input::-webkit-outer-spin-button,
+.price-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.price-input:focus { border-color: var(--purple); box-shadow: 0 0 0 3px rgba(91,79,207,0.12); }
+.price-suffix {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  font-size: 12px; color: var(--text-3); pointer-events: none;
 }
 
 /* PICKER */
@@ -347,6 +439,37 @@ select.input {
 .add-step-btn:hover { background: var(--surface2); border-color: var(--purple); color: var(--purple); }
 .add-step-btn.disabled { opacity: .35; pointer-events: none; }
 
+/* EMPTY STATE for parts list */
+.empty-parts {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: .75rem;
+  padding: 2rem 1rem;
+  border: 1.5px dashed var(--border-md);
+  border-radius: var(--radius);
+  background: var(--surface2);
+  text-align: center;
+}
+.empty-parts-icon {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--purple-light);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--purple); font-size: 20px;
+}
+.empty-parts-title { font-size: 14px; font-weight: 500; color: var(--text); }
+.empty-parts-hint { font-size: 12px; color: var(--text-2); max-width: 380px; line-height: 1.5; }
+
+/* TOTAL ROW */
+.total-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .75rem 1rem;
+  margin-top: .75rem;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.total-label { font-size: 13px; color: var(--text-2); font-weight: 500; }
+.total-value { font-size: 15px; font-weight: 600; color: var(--text); }
+
 /* FORM ACTIONS */
 .form-actions {
   display: flex; align-items: center; justify-content: flex-end; gap: .5rem;
@@ -380,7 +503,6 @@ select.input {
 .saved-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: .375rem; }
 .saved-sub { font-size: 13px; color: var(--text-2); margin-bottom: 1.5rem; }
 
-/* STEPPER (bild 6-stil) för referens i header */
 .proto-badge {
   display: inline-flex; align-items: center; gap: .375rem;
   font-size: 11px; color: var(--text-3);
@@ -402,9 +524,13 @@ select.input {
 <div class="topbar">
   <div class="topbar-logo">
     <span class="open-text">OPEN</span>
-    <span class="bo-text">BACKOFFICE</span>
+    <span class="bo-text" data-i18n="backoffice">BACKOFFICE</span>
   </div>
   <div class="topbar-right">
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" class="lang-btn" data-lang="sv">SV</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
     <span class="topbar-bell">🔔</span>
     <div class="topbar-avatar">MS</div>
   </div>
@@ -414,62 +540,62 @@ select.input {
 <div class="sidebar">
   <div class="nav-section">
     <div class="nav-item">
-      <span class="nav-icon">📊</span> Dashboard
+      <span class="nav-icon">📊</span><span data-i18n="nav_dashboard">Dashboard</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item parent">
-      <span class="nav-icon">📦</span> Articles
+      <span class="nav-icon">📦</span><span data-i18n="nav_articles">Articles</span>
       <span class="nav-chevron">▾</span>
     </div>
     <div class="nav-sub">
-      <div class="nav-item">Cash register layout</div>
-      <div class="nav-item active">Articles</div>
-      <div class="nav-item">Variants</div>
-      <div class="nav-item">Product groups</div>
-      <div class="nav-item">Article notes</div>
-      <div class="nav-item">Deposit</div>
-      <div class="nav-item">Campaign discounts</div>
+      <div class="nav-item" data-i18n="nav_layout">Cash register layout</div>
+      <div class="nav-item active" data-i18n="nav_articles">Articles</div>
+      <div class="nav-item" data-i18n="nav_variants">Variants</div>
+      <div class="nav-item" data-i18n="nav_product_groups">Product groups</div>
+      <div class="nav-item" data-i18n="nav_notes">Article notes</div>
+      <div class="nav-item" data-i18n="nav_deposit">Deposit</div>
+      <div class="nav-item" data-i18n="nav_campaign">Campaign discounts</div>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item parent">
-      <span class="nav-icon">📈</span> Reports
+      <span class="nav-icon">📈</span><span data-i18n="nav_reports">Reports</span>
       <span class="nav-chevron">▾</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item parent">
-      <span class="nav-icon">🏢</span> Company
+      <span class="nav-icon">🏢</span><span data-i18n="nav_company">Company</span>
       <span class="nav-chevron">▾</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item parent">
-      <span class="nav-icon">⚙️</span> Settings
+      <span class="nav-icon">⚙️</span><span data-i18n="nav_settings">Settings</span>
       <span class="nav-chevron">▾</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item parent">
-      <span class="nav-icon">💰</span> Finance
+      <span class="nav-icon">💰</span><span data-i18n="nav_finance">Finance</span>
       <span class="nav-chevron">▾</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item parent">
-      <span class="nav-icon">📦</span> Storage
+      <span class="nav-icon">📦</span><span data-i18n="nav_storage">Storage</span>
       <span class="nav-chevron">▾</span>
     </div>
   </div>
   <div class="nav-section">
     <div class="nav-item">
-      <span class="nav-icon">🪑</span> Table management
+      <span class="nav-icon">🪑</span><span data-i18n="nav_tables">Table management</span>
     </div>
   </div>
   <div class="nav-section" style="margin-top:auto;padding-top:1rem">
     <div class="nav-item">
-      <span class="nav-icon">❓</span> Help center
+      <span class="nav-icon">❓</span><span data-i18n="nav_help">Help center</span>
     </div>
   </div>
 </div>
@@ -478,11 +604,11 @@ select.input {
 <div class="content">
   <div class="page-header">
     <div class="breadcrumb">
-      <a>Articles</a> <span>›</span> <span>Ny kombinationsartikel</span>
+      <a data-i18n="nav_articles">Articles</a> <span>›</span> <span data-i18n="page_title">Ny kombinationsartikel</span>
     </div>
     <div style="display:flex;align-items:center">
-      <h1 class="page-title">Ny kombinationsartikel</h1>
-      <span class="proto-badge">● Prototyp</span>
+      <h1 class="page-title" data-i18n="page_title">Ny kombinationsartikel</h1>
+      <span class="proto-badge">● <span data-i18n="badge_prototype">Prototyp</span></span>
     </div>
   </div>
 
@@ -492,304 +618,591 @@ select.input {
   <div class="card" id="mainCard">
     <div class="field-row">
       <div class="field">
-        <label>Namn</label>
-        <input class="input" type="text" value="Stora menyn" id="comboName">
+        <label data-i18n="field_name">Namn</label>
+        <input class="input" type="text" id="comboName" placeholder="">
       </div>
       <div class="field">
-        <label>Kassekategori</label>
-        <select class="input">
-          <option value="">Välj kategori</option>
-          <option>Menyer</option>
-          <option>Lunch</option>
-          <option>À la carte</option>
+        <label data-i18n="field_category">Kassekategori</label>
+        <select class="input" id="categorySelect">
+          <option value="" data-i18n="opt_choose_category">Välj kategori</option>
+          <option data-i18n="opt_menus">Menyer</option>
+          <option data-i18n="opt_lunch">Lunch</option>
+          <option data-i18n="opt_alacarte">À la carte</option>
         </select>
       </div>
       <div class="field">
-        <label>Kvittovisning</label>
+        <label data-i18n="field_receipt">Kvittovisning</label>
         <select class="input" id="receiptMode">
-          <option value="total">Totalpris – Stora menyn · 230 kr</option>
-          <option value="itemized" selected>Per del – Förrätt: Laxtataki · 80 kr</option>
+          <option value="total" data-i18n="opt_receipt_total">Totalpris</option>
+          <option value="itemized" selected data-i18n="opt_receipt_itemized">Per del</option>
         </select>
       </div>
     </div>
 
     <div class="divider"></div>
-    <div class="section-label">Delar</div>
+    <div class="section-label" data-i18n="section_parts">Delar</div>
 
-    <div class="steps" id="stepsList">
+    <div class="steps" id="stepsList"></div>
 
-      <div class="step-block" id="step-0">
-        <div class="step-header" onclick="toggleStep(0)">
-          <span class="drag-handle">⠿</span>
-          <div class="step-num">1</div>
-          <span class="step-name">Förrätt</span>
-          <span class="badge" id="badge-0">3 artiklar</span>
-          <span class="chevron" id="chev-0">▾</span>
-        </div>
-        <div id="body-0" class="collapsed-body">
-          <span class="pill default">Laxtataki (standard)</span>
-          <span class="pill">Burrata</span>
-          <span class="pill">Säsongens soppa</span>
-        </div>
-      </div>
-
-      <div class="step-block" id="step-1">
-        <div class="step-header" onclick="toggleStep(1)">
-          <span class="drag-handle">⠿</span>
-          <div class="step-num">2</div>
-          <span class="step-name">Varmrätt</span>
-          <span class="badge" id="badge-1">4 artiklar</span>
-          <span class="chevron" id="chev-1">▾</span>
-        </div>
-        <div id="body-1" class="collapsed-body">
-          <span class="pill default">Entrecôte (standard)</span>
-          <span class="pill">Lax</span>
-          <span class="pill">Pasta funghi</span>
-          <span class="pill">Vegetarisk biff</span>
-        </div>
-      </div>
-
-      <div class="step-block" id="step-2">
-        <div class="step-header" onclick="toggleStep(2)">
-          <span class="drag-handle">⠿</span>
-          <div class="step-num">3</div>
-          <span class="step-name">Dessert</span>
-          <span class="badge" id="badge-2">2 artiklar</span>
-          <span class="chevron" id="chev-2">▾</span>
-        </div>
-        <div id="body-2" class="collapsed-body">
-          <span class="pill default">Chokladfondant (standard)</span>
-          <span class="pill">Sorbet</span>
-        </div>
-      </div>
-
+    <div id="emptyState" class="empty-parts" style="display:none">
+      <div class="empty-parts-icon">+</div>
+      <div class="empty-parts-title" data-i18n="empty_parts_title">Lägg till din första del</div>
+      <div class="empty-parts-hint" data-i18n="empty_parts_hint">Varje del blir ett steg i kassan — t.ex. Förrätt, Varmrätt, Dessert.</div>
+      <button type="button" class="btn btn-primary btn-sm" onclick="showNewStep()" data-i18n="add_first_part">Lägg till första delen</button>
     </div>
 
-    <div class="add-step-btn" id="addStepBtn" onclick="showNewStep()">
-      <span style="font-size:16px;line-height:1">+</span> Lägg till del
+    <div class="total-row" id="totalRow" style="display:none">
+      <span class="total-label" data-i18n="total_label">Totalt</span>
+      <span class="total-value" id="totalValue">0 kr</span>
+    </div>
+
+    <div class="add-step-btn" id="addStepBtn" onclick="showNewStep()" style="display:none">
+      <span style="font-size:16px;line-height:1">+</span> <span data-i18n="add_part">Lägg till del</span>
     </div>
 
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="resetAll()">Avbryt</button>
-      <button class="btn btn-primary" onclick="saveCombo()">Spara kombinationsartikel</button>
+      <button class="btn btn-ghost" onclick="resetAll()" data-i18n="cancel">Avbryt</button>
+      <button class="btn btn-primary" id="saveBtn" onclick="saveCombo()" data-i18n="save" disabled>Spara kombinationsartikel</button>
     </div>
   </div>
 </div>
 
 <script>
+/* ---------- i18n ---------- */
+const T = {
+  sv: {
+    backoffice: 'BACKOFFICE',
+    nav_dashboard: 'Dashboard', nav_articles: 'Artiklar', nav_layout: 'Kassalayout',
+    nav_variants: 'Varianter', nav_product_groups: 'Varugrupper', nav_notes: 'Artikelnoteringar',
+    nav_deposit: 'Pant', nav_campaign: 'Kampanjrabatter', nav_reports: 'Rapporter',
+    nav_company: 'Företag', nav_settings: 'Inställningar', nav_finance: 'Ekonomi',
+    nav_storage: 'Lager', nav_tables: 'Bordshantering', nav_help: 'Hjälpcenter',
+    page_title: 'Ny kombinationsartikel',
+    badge_prototype: 'Prototyp',
+    field_name: 'Namn',
+    field_category: 'Kassekategori',
+    field_receipt: 'Kvittovisning',
+    opt_choose_category: 'Välj kategori',
+    opt_menus: 'Menyer', opt_lunch: 'Lunch', opt_alacarte: 'À la carte',
+    opt_receipt_total: 'Totalpris – visas som en rad i kassan',
+    opt_receipt_itemized: 'Per del – varje del visas på egen rad',
+    section_parts: 'Delar',
+    total_label: 'Totalt',
+    add_part: 'Lägg till del',
+    cancel: 'Avbryt',
+    save: 'Spara kombinationsartikel',
+    part_name_label: 'Namn på del',
+    part_name_placeholder: 'T.ex. Dryck, Tillbehör...',
+    part_hint: 'Visas i kassan och på köksbongen.',
+    choose_items: 'Välj artiklar',
+    search_placeholder: 'Sök artikel...',
+    group_all: 'Varugrupp: Alla',
+    group_prefix: 'Varugrupp: ',
+    none_selected: 'Inga valda',
+    default_label: 'Standard',
+    done: 'Klar',
+    set_default: 'Sätt som standard',
+    default_badge: 'Standard',
+    no_items_selected: 'Inga artiklar valda',
+    new_part: 'Ny del',
+    saved_suffix: 'har sparats',
+    saved_sub: 'Kombinationsartikeln är nu tillgänglig i kassan.',
+    create_new: 'Skapa ny kombinationsartikel',
+    price_label: 'Pris',
+    standard_marker: 'standard',
+    name_placeholder: 'T.ex. Stora menyn',
+    no_price: 'Sätt pris',
+    empty_parts_title: 'Lägg till din första del',
+    empty_parts_hint: 'Varje del blir ett steg i kassan — t.ex. Förrätt, Varmrätt, Dessert.',
+    add_first_part: 'Lägg till första delen',
+    selected_label: 'Valda artiklar',
+    remove_aria: 'Ta bort',
+    add_more: 'Lägg till fler',
+    items: n => `${n} ${n === 1 ? 'artikel' : 'artiklar'}`,
+    selected_summary: (n, def) => `${n} ${n === 1 ? 'vald' : 'valda'} · Standard: ${def || '–'}`,
+    toast_part_saved: (name, n) => `${name} sparad – ${n} ${n === 1 ? 'artikel' : 'artiklar'} vald${n === 1 ? '' : 'a'}`,
+    saved_title: name => `${name} har sparats`,
+  },
+  en: {
+    backoffice: 'BACKOFFICE',
+    nav_dashboard: 'Dashboard', nav_articles: 'Articles', nav_layout: 'Cash register layout',
+    nav_variants: 'Variants', nav_product_groups: 'Product groups', nav_notes: 'Article notes',
+    nav_deposit: 'Deposit', nav_campaign: 'Campaign discounts', nav_reports: 'Reports',
+    nav_company: 'Company', nav_settings: 'Settings', nav_finance: 'Finance',
+    nav_storage: 'Storage', nav_tables: 'Table management', nav_help: 'Help center',
+    page_title: 'New combination item',
+    badge_prototype: 'Prototype',
+    field_name: 'Name',
+    field_category: 'Register category',
+    field_receipt: 'Receipt display',
+    opt_choose_category: 'Choose category',
+    opt_menus: 'Menus', opt_lunch: 'Lunch', opt_alacarte: 'À la carte',
+    opt_receipt_total: 'Total price — shown as one line in the register',
+    opt_receipt_itemized: 'Per part — each part shown on its own line',
+    section_parts: 'Parts',
+    total_label: 'Total',
+    add_part: 'Add part',
+    cancel: 'Cancel',
+    save: 'Save combination item',
+    part_name_label: 'Part name',
+    part_name_placeholder: 'E.g. Drink, Side...',
+    part_hint: 'Shown at the register and on the kitchen chit.',
+    choose_items: 'Choose items',
+    search_placeholder: 'Search item...',
+    group_all: 'Product group: All',
+    group_prefix: 'Product group: ',
+    none_selected: 'None selected',
+    default_label: 'Default',
+    done: 'Done',
+    set_default: 'Set as default',
+    default_badge: 'Default',
+    no_items_selected: 'No items selected',
+    new_part: 'New part',
+    saved_suffix: 'has been saved',
+    saved_sub: 'The combination item is now available at the register.',
+    create_new: 'Create new combination item',
+    price_label: 'Price',
+    standard_marker: 'default',
+    name_placeholder: 'E.g. Big menu',
+    no_price: 'Set price',
+    empty_parts_title: 'Add your first part',
+    empty_parts_hint: 'Each part becomes a step at the register — e.g. Starter, Main, Dessert.',
+    add_first_part: 'Add first part',
+    selected_label: 'Selected items',
+    remove_aria: 'Remove',
+    add_more: 'Add more',
+    items: n => `${n} ${n === 1 ? 'item' : 'items'}`,
+    selected_summary: (n, def) => `${n} selected · Default: ${def || '–'}`,
+    toast_part_saved: (name, n) => `${name} saved — ${n} item${n === 1 ? '' : 's'} selected`,
+    saved_title: name => `${name} has been saved`,
+  },
+};
+
+function t(key, ...args) {
+  const entry = T[lang][key];
+  if (typeof entry === 'function') return entry(...args);
+  return entry ?? key;
+}
+
+/* ---------- data ---------- */
 const ARTICLES = [
-  {name:'Husets rödvin',group:'Alkohol'},{name:'Husets vitvin',group:'Alkohol'},
-  {name:'Prosecco',group:'Alkohol'},{name:'Gin & tonic',group:'Alkohol'},{name:'Öl',group:'Alkohol'},
-  {name:'Mineralvatten',group:'Dryck'},{name:'Lemonad',group:'Dryck'},{name:'Kaffe',group:'Dryck'},
-  {name:'Te',group:'Dryck'},{name:'Apelsinjuice',group:'Dryck'},
-  {name:'Laxtataki',group:'Förrätter'},{name:'Burrata',group:'Förrätter'},
-  {name:'Säsongens soppa',group:'Förrätter'},{name:'Ceviche',group:'Förrätter'},
-  {name:'Entrecôte',group:'Varmrätter'},{name:'Lax',group:'Varmrätter'},
-  {name:'Pasta funghi',group:'Varmrätter'},{name:'Vegetarisk biff',group:'Varmrätter'},
-  {name:'Chokladfondant',group:'Dessert'},{name:'Sorbet',group:'Dessert'},{name:'Osttallrik',group:'Dessert'},
+  {id: 0,  sv:'Husets rödvin',    en:'House red wine',    gSv:'Alkohol',    gEn:'Alcohol'},
+  {id: 1,  sv:'Husets vitvin',    en:'House white wine',  gSv:'Alkohol',    gEn:'Alcohol'},
+  {id: 2,  sv:'Prosecco',         en:'Prosecco',          gSv:'Alkohol',    gEn:'Alcohol'},
+  {id: 3,  sv:'Gin & tonic',      en:'Gin & tonic',       gSv:'Alkohol',    gEn:'Alcohol'},
+  {id: 4,  sv:'Öl',               en:'Beer',              gSv:'Alkohol',    gEn:'Alcohol'},
+  {id: 5,  sv:'Mineralvatten',    en:'Mineral water',     gSv:'Dryck',      gEn:'Drinks'},
+  {id: 6,  sv:'Lemonad',          en:'Lemonade',          gSv:'Dryck',      gEn:'Drinks'},
+  {id: 7,  sv:'Kaffe',            en:'Coffee',            gSv:'Dryck',      gEn:'Drinks'},
+  {id: 8,  sv:'Te',               en:'Tea',               gSv:'Dryck',      gEn:'Drinks'},
+  {id: 9,  sv:'Apelsinjuice',     en:'Orange juice',      gSv:'Dryck',      gEn:'Drinks'},
+  {id:10,  sv:'Laxtataki',        en:'Salmon tataki',     gSv:'Förrätter',  gEn:'Starters'},
+  {id:11,  sv:'Burrata',          en:'Burrata',           gSv:'Förrätter',  gEn:'Starters'},
+  {id:12,  sv:'Säsongens soppa',  en:'Seasonal soup',     gSv:'Förrätter',  gEn:'Starters'},
+  {id:13,  sv:'Ceviche',          en:'Ceviche',           gSv:'Förrätter',  gEn:'Starters'},
+  {id:14,  sv:'Entrecôte',        en:'Entrecôte',         gSv:'Varmrätter', gEn:'Mains'},
+  {id:15,  sv:'Lax',              en:'Salmon',            gSv:'Varmrätter', gEn:'Mains'},
+  {id:16,  sv:'Pasta funghi',     en:'Pasta funghi',      gSv:'Varmrätter', gEn:'Mains'},
+  {id:17,  sv:'Vegetarisk biff',  en:'Vegetarian steak',  gSv:'Varmrätter', gEn:'Mains'},
+  {id:18,  sv:'Chokladfondant',   en:'Chocolate fondant', gSv:'Dessert',    gEn:'Dessert'},
+  {id:19,  sv:'Sorbet',           en:'Sorbet',            gSv:'Dessert',    gEn:'Dessert'},
+  {id:20,  sv:'Osttallrik',       en:'Cheese plate',      gSv:'Dessert',    gEn:'Dessert'},
 ];
-const GROUPS = ['Alla',...new Set(ARTICLES.map(a=>a.group))];
-let stepCount=3, openSteps={}, newStepVisible=false, pickerState={};
+const artName = a => a[lang];
+const artGroup = a => a[lang === 'sv' ? 'gSv' : 'gEn'];
+const artById = id => ARTICLES.find(a => a.id === id);
 
-function toggleStep(idx){
-  if(newStepVisible) return;
-  openSteps[idx]=!openSteps[idx];
-  renderStep(idx);
+function allGroups() {
+  const key = lang === 'sv' ? 'gSv' : 'gEn';
+  return [...new Set(ARTICLES.map(a => a[key]))];
 }
 
-function renderStep(idx){
-  const block=document.getElementById('step-'+idx);
-  if(!block) return;
-  const header=block.querySelector('.step-header');
-  const chev=document.getElementById('chev-'+idx);
-  if(openSteps[idx]){
-    block.classList.add('active');
-    header.classList.add('active-header');
-    chev && chev.classList.add('open');
-    renderPicker(idx);
-  } else {
-    block.classList.remove('active');
-    header.classList.remove('active-header');
-    chev && chev.classList.remove('open');
-    renderCollapsed(idx);
-  }
+/* ---------- state ---------- */
+let lang = localStorage.getItem('lang') || 'sv';
+
+/** Start empty — the real flow begins with no parts. */
+let steps = [];
+const stepName = s => lang === 'sv' ? s.nameSv : s.nameEn;
+
+function fmtPrice(p) {
+  return (p || 0) + ' kr';
 }
 
-function renderCollapsed(idx){
-  const body=document.getElementById('body-'+idx);
-  const state=pickerState[idx];
-  if(!state||state.selected.size===0){
-    body.className='collapsed-body';
-    body.innerHTML='<span style="font-size:12px;color:var(--text-3)">Inga artiklar valda</span>';
-    return;
-  }
-  body.className='collapsed-body';
-  let html='';
-  state.selected.forEach(name=>{
-    const isDef=state.defaultArticle===name;
-    html+=`<span class="pill${isDef?' default':''}">${name}${isDef?' (standard)':''}</span>`;
+/* ---------- rendering ---------- */
+function renderAll() {
+  document.documentElement.setAttribute('lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
   });
-  body.innerHTML=html;
+  // name placeholder (no default value — start empty)
+  const nameInput = document.getElementById('comboName');
+  nameInput.placeholder = t('name_placeholder');
+  // lang toggle active state
+  document.querySelectorAll('.lang-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === lang));
+  // steps list + empty/total visibility
+  renderSteps();
+  renderTotal();
+  renderLayoutVisibility();
+  updateSaveBtn();
 }
 
-function renderPicker(idx){
-  if(!pickerState[idx]) pickerState[idx]={selected:new Set(),defaultArticle:null,search:'',group:''};
-  const body=document.getElementById('body-'+idx);
-  body.className='step-body';
-  const state=pickerState[idx];
-  const groupOpts=GROUPS.map(g=>`<option value="${g==='Alla'?'':g}" ${state.group===(g==='Alla'?'':g)?'selected':''}>${g==='Alla'?'Varugrupp: Alla':g}</option>`).join('');
-  body.innerHTML=`
+function renderLayoutVisibility() {
+  const hasSteps = steps.length > 0;
+  document.getElementById('emptyState').style.display = hasSteps ? 'none' : 'flex';
+  document.getElementById('totalRow').style.display = hasSteps ? 'flex' : 'none';
+  document.getElementById('addStepBtn').style.display = hasSteps ? 'flex' : 'none';
+}
+
+function isValid() {
+  const name = document.getElementById('comboName').value.trim();
+  if (!name) return false;
+  if (steps.length === 0) return false;
+  if (steps.some(s => s.isNew)) return false;
+  return steps.every(s => s.selected.size > 0 && (s.price || 0) > 0);
+}
+
+function updateSaveBtn() {
+  const btn = document.getElementById('saveBtn');
+  if (btn) btn.disabled = !isValid();
+}
+
+function renderSteps() {
+  const list = document.getElementById('stepsList');
+  list.innerHTML = '';
+  steps.forEach((step, idx) => list.appendChild(buildStepBlock(step, idx)));
+}
+
+function buildStepBlock(step, idx) {
+  const block = document.createElement('div');
+  block.className = 'step-block' + (step.open ? ' active' : '') + (step.isNew ? ' new-step' : '');
+  block.id = 'step-' + idx;
+
+  if (step.isNew) {
+    block.innerHTML = `
+      <div class="step-header new-header">
+        <span class="drag-handle" style="opacity:.2">⠿</span>
+        <div class="step-num purple">${idx + 1}</div>
+        <span class="step-name purple-text">${t('new_part')}</span>
+      </div>
+      <div class="new-step-body">
+        <div class="name-row">
+          <span class="name-label">${t('part_name_label')}</span>
+          <input class="name-input" type="text" id="newStepName" placeholder="${t('part_name_placeholder')}">
+        </div>
+        <div class="field-hint">${t('part_hint')}</div>
+        <div class="new-btns">
+          <button class="btn btn-primary btn-sm" onclick="confirmNewStep(${idx})">${t('choose_items')}</button>
+          <button class="btn btn-ghost btn-sm" onclick="cancelNewStep(${idx})">${t('cancel')}</button>
+        </div>
+      </div>`;
+    return block;
+  }
+
+  // header
+  const count = step.selected.size;
+  const priceDisplay = step.price > 0
+    ? `<span class="price-badge">${fmtPrice(step.price)}</span>`
+    : `<span class="price-badge empty">${t('no_price')}</span>`;
+
+  const header = `
+    <div class="step-header${step.open ? ' active-header' : ''}" onclick="toggleStep(${idx})">
+      <span class="drag-handle" onclick="event.stopPropagation()">⠿</span>
+      <div class="step-num${step.open ? ' purple' : ''}">${idx + 1}</div>
+      <span class="step-name">${stepName(step)}</span>
+      <span class="badge">${t('items', count)}</span>
+      ${priceDisplay}
+      <span class="chevron${step.open ? ' open' : ''}">▾</span>
+    </div>`;
+
+  // body
+  let body;
+  if (step.open) {
+    body = `<div class="step-body">${renderPriceRow(step, idx)}${renderPickerInner(step, idx)}</div>`;
+  } else if (count === 0) {
+    body = `<div class="collapsed-body"><span style="font-size:12px;color:var(--text-3)">${t('no_items_selected')}</span></div>`;
+  } else {
+    let pills = '';
+    step.selected.forEach(id => {
+      const a = artById(id);
+      if (!a) return;
+      const isDef = step.defaultId === id;
+      pills += `<span class="pill${isDef ? ' default' : ''}">${artName(a)}${isDef ? ' (' + t('standard_marker') + ')' : ''}</span>`;
+    });
+    body = `<div class="collapsed-body">${pills}</div>`;
+  }
+
+  block.innerHTML = header + body;
+  return block;
+}
+
+function renderPriceRow(step, idx) {
+  return `
+    <div class="price-row">
+      <label for="price-${idx}">${t('price_label')}</label>
+      <div class="price-input-wrap">
+        <input type="number" min="0" step="1" id="price-${idx}" class="price-input"
+               value="${step.price || ''}" placeholder="0"
+               oninput="updatePrice(${idx}, this.value)">
+        <span class="price-suffix">kr</span>
+      </div>
+    </div>`;
+}
+
+function renderPickerInner(step, idx) {
+  const groups = allGroups();
+  const groupOpts = `<option value="">${t('group_all')}</option>` +
+    groups.map(g => `<option value="${g}" ${step.group === g ? 'selected' : ''}>${t('group_prefix')}${g}</option>`).join('');
+  return `
+    <div id="selrow-${idx}"></div>
+    <div class="section-label" style="margin-bottom:.5rem">${t('add_more')}</div>
     <div class="search-row">
       <div class="search-wrap">
         <span class="search-icon">⌕</span>
-        <input class="search-input" type="text" placeholder="Sök artikel..." value="${state.search}" id="search-${idx}">
+        <input class="search-input" type="text" placeholder="${t('search_placeholder')}" value="${step.search}" id="search-${idx}">
       </div>
       <select class="filter-sel" id="group-${idx}">${groupOpts}</select>
     </div>
     <div class="article-list" id="alist-${idx}"></div>
     <div class="picker-footer">
       <span class="footer-count" id="fcount-${idx}"></span>
-      <button class="btn btn-primary btn-sm" id="doneBtn-${idx}" onclick="closePicker(${idx})" disabled>Klar</button>
+      <button class="btn btn-primary btn-sm" id="doneBtn-${idx}" onclick="closePicker(${idx})">${t('done')}</button>
     </div>`;
-  document.getElementById('search-'+idx).addEventListener('input',e=>{pickerState[idx].search=e.target.value;renderArticleList(idx);});
-  document.getElementById('group-'+idx).addEventListener('change',e=>{pickerState[idx].group=e.target.value;renderArticleList(idx);});
+}
+
+function renderSelectedRow(idx) {
+  const s = steps[idx];
+  const row = document.getElementById('selrow-' + idx);
+  if (!row) return;
+  if (s.selected.size === 0) {
+    row.className = 'selected-row empty';
+    row.innerHTML = t('no_items_selected');
+    return;
+  }
+  row.className = 'selected-row';
+  let html = `<span class="selected-label">${t('selected_label')}</span>`;
+  s.selected.forEach(id => {
+    const a = artById(id);
+    if (!a) return;
+    const isDef = s.defaultId === id;
+    const labelSuffix = isDef ? ` (${t('standard_marker')})` : '';
+    const title = isDef ? '' : t('set_default');
+    html += `<span class="pill interactive${isDef ? ' default' : ''}" title="${title}" onclick="setDefault(event, ${idx}, ${a.id})">${artName(a)}${labelSuffix}<span class="pill-remove" role="button" aria-label="${t('remove_aria')}" onclick="removeArticle(event, ${idx}, ${a.id})">×</span></span>`;
+  });
+  row.innerHTML = html;
+}
+
+function bindPickerEvents(idx) {
+  const s = steps[idx];
+  const searchEl = document.getElementById('search-' + idx);
+  if (searchEl) searchEl.addEventListener('input', e => { s.search = e.target.value; renderArticleList(idx); });
+  const groupEl = document.getElementById('group-' + idx);
+  if (groupEl) groupEl.addEventListener('change', e => { s.group = e.target.value; renderArticleList(idx); });
+  renderSelectedRow(idx);
   renderArticleList(idx);
 }
 
-function renderArticleList(idx){
-  const state=pickerState[idx];
-  const filtered=ARTICLES.filter(a=>
-    (!state.search||a.name.toLowerCase().includes(state.search.toLowerCase()))&&
-    (!state.group||a.group===state.group)
+/**
+ * Expanded list shows only unselected articles (the "add more" pool).
+ * Selected articles live in the pill row above (renderSelectedRow), matching
+ * the collapsed representation.
+ */
+function renderArticleList(idx) {
+  const s = steps[idx];
+  const key = lang === 'sv' ? 'gSv' : 'gEn';
+  const filtered = ARTICLES.filter(a =>
+    !s.selected.has(a.id) &&
+    (!s.search || artName(a).toLowerCase().includes(s.search.toLowerCase())) &&
+    (!s.group || a[key] === s.group)
   );
-  const list=document.getElementById('alist-'+idx);
-  list.innerHTML=filtered.map(a=>{
-    const isSel=state.selected.has(a.name);
-    const isDef=state.defaultArticle===a.name;
-    return `<div class="article-row${isSel?' selected':''}" onclick="toggleArticle(${idx},'${a.name.replace(/'/g,"\\'")}')">
-      <div class="art-checkbox${isSel?' checked':''}"></div>
-      <span class="art-name">${a.name}</span>
-      <span class="art-group">${a.group}</span>
-      ${isSel?isDef?'<span class="default-badge">Standard</span>':`<span class="set-default-btn" onclick="setDefault(event,${idx},'${a.name.replace(/'/g,"\\'")}')">Sätt som standard</span>`:'<span style="min-width:110px"></span>'}
-    </div>`;
-  }).join('');
+  const list = document.getElementById('alist-' + idx);
+  if (!list) return;
+  if (filtered.length === 0) {
+    list.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--text-3);font-size:12px">—</div>`;
+  } else {
+    list.innerHTML = filtered.map(a => `
+      <div class="article-row" onclick="toggleArticle(${idx}, ${a.id})">
+        <div class="art-checkbox"></div>
+        <span class="art-name">${artName(a)}</span>
+        <span class="art-group">${artGroup(a)}</span>
+      </div>`).join('');
+  }
   updatePickerFooter(idx);
 }
 
-function toggleArticle(idx,name){
-  const s=pickerState[idx];
-  if(s.selected.has(name)){s.selected.delete(name);if(s.defaultArticle===name)s.defaultArticle=s.selected.size>0?[...s.selected][0]:null;}
-  else{s.selected.add(name);if(!s.defaultArticle)s.defaultArticle=name;}
-  renderArticleList(idx);updateBadge(idx);
+function toggleArticle(idx, id) {
+  const s = steps[idx];
+  if (s.selected.has(id)) {
+    s.selected.delete(id);
+    if (s.defaultId === id) s.defaultId = s.selected.size > 0 ? [...s.selected][0] : null;
+  } else {
+    s.selected.add(id);
+    if (!s.defaultId) s.defaultId = id;
+  }
+  renderSelectedRow(idx);
+  renderArticleList(idx);
+  updateBadgeAndHeader(idx);
 }
 
-function setDefault(e,idx,name){e.stopPropagation();pickerState[idx].defaultArticle=name;renderArticleList(idx);}
-
-function updatePickerFooter(idx){
-  const s=pickerState[idx],count=s.selected.size;
-  const fc=document.getElementById('fcount-'+idx);
-  const db=document.getElementById('doneBtn-'+idx);
-  if(fc) fc.textContent=count===0?'Inga valda':`${count} ${count===1?'vald':'valda'} · Standard: ${s.defaultArticle||'–'}`;
-  if(db){db.disabled=count===0;}
+function removeArticle(e, idx, id) {
+  e.stopPropagation();
+  const s = steps[idx];
+  s.selected.delete(id);
+  if (s.defaultId === id) s.defaultId = s.selected.size > 0 ? [...s.selected][0] : null;
+  renderSelectedRow(idx);
+  renderArticleList(idx);
+  updateBadgeAndHeader(idx);
 }
 
-function updateBadge(idx){
-  const s=pickerState[idx],count=s?s.selected.size:0;
-  const badge=document.getElementById('badge-'+idx);
-  if(badge) badge.textContent=count+' '+(count===1?'artikel':'artiklar');
+function setDefault(e, idx, id) {
+  e.stopPropagation();
+  if (!steps[idx].selected.has(id)) return;
+  steps[idx].defaultId = id;
+  renderSelectedRow(idx);
 }
 
-function closePicker(idx){
-  openSteps[idx]=false;
-  const s=pickerState[idx];
-  if(s&&s.selected.size>0) showToast(`${getStepName(idx)} sparad – ${s.selected.size} ${s.selected.size===1?'artikel':'artiklar'} vald${s.selected.size===1?'':'a'}`);
-  renderStep(idx);
+function updateBadgeAndHeader(idx) {
+  // Re-render just this step block's header badge without full remount,
+  // to avoid losing focus in the search input.
+  const block = document.getElementById('step-' + idx);
+  if (!block) return;
+  const badge = block.querySelector('.step-header .badge');
+  if (badge) badge.textContent = t('items', steps[idx].selected.size);
+  updatePickerFooter(idx);
+  updateSaveBtn();
 }
 
-function getStepName(idx){
-  const b=document.getElementById('step-'+idx);
-  return b?b.querySelector('.step-name').textContent:'Del';
+function updatePickerFooter(idx) {
+  const s = steps[idx];
+  const count = s.selected.size;
+  const fc = document.getElementById('fcount-' + idx);
+  const db = document.getElementById('doneBtn-' + idx);
+  if (fc) {
+    const def = s.defaultId ? artName(artById(s.defaultId)) : '';
+    fc.textContent = count === 0 ? t('none_selected') : t('selected_summary', count, def);
+  }
+  if (db) db.disabled = count === 0;
 }
 
-function showNewStep(){
-  if(newStepVisible) return;
-  newStepVisible=true;
+function updatePrice(idx, v) {
+  const n = parseInt(v, 10);
+  steps[idx].price = isNaN(n) || n < 0 ? 0 : n;
+  // update the header price badge without re-mount
+  const block = document.getElementById('step-' + idx);
+  if (block) {
+    const pb = block.querySelector('.step-header .price-badge');
+    const s = steps[idx];
+    if (pb) {
+      if (s.price > 0) { pb.textContent = fmtPrice(s.price); pb.classList.remove('empty'); }
+      else { pb.textContent = t('no_price'); pb.classList.add('empty'); }
+    }
+  }
+  renderTotal();
+  updateSaveBtn();
+}
+
+function renderTotal() {
+  const sum = steps.reduce((acc, s) => acc + (s.price || 0), 0);
+  document.getElementById('totalValue').textContent = fmtPrice(sum);
+}
+
+function toggleStep(idx) {
+  if (steps.some(s => s.isNew)) return;
+  steps[idx].open = !steps[idx].open;
+  renderSteps();
+  renderTotal();
+  updateSaveBtn();
+  if (steps[idx].open) bindPickerEvents(idx);
+}
+
+function closePicker(idx) {
+  const s = steps[idx];
+  s.open = false;
+  if (s.selected.size > 0) showToast(t('toast_part_saved', stepName(s), s.selected.size));
+  renderSteps();
+  renderTotal();
+  updateSaveBtn();
+}
+
+function showNewStep() {
+  if (steps.some(s => s.isNew)) return;
   document.getElementById('addStepBtn').classList.add('disabled');
-  const newIdx=stepCount;
-  const div=document.createElement('div');
-  div.className='step-block new-step';div.id='step-'+newIdx;
-  div.innerHTML=`
-    <div class="step-header new-header">
-      <span class="drag-handle" style="opacity:.2">⠿</span>
-      <div class="step-num purple">${newIdx+1}</div>
-      <span class="step-name purple-text">Ny del</span>
-    </div>
-    <div class="new-step-body">
-      <div class="name-row">
-        <span class="name-label">Namn på del</span>
-        <input class="name-input" type="text" id="newStepName" placeholder="T.ex. Dryck, Tillbehör...">
-      </div>
-      <div class="field-hint">Visas i kassan och på köksbon gen.</div>
-      <div class="new-btns">
-        <button class="btn btn-primary btn-sm" onclick="confirmNewStep(${newIdx})">Välj artiklar</button>
-        <button class="btn btn-ghost btn-sm" onclick="cancelNewStep(${newIdx})">Avbryt</button>
-      </div>
-    </div>`;
-  document.getElementById('stepsList').appendChild(div);
-  setTimeout(()=>{const n=document.getElementById('newStepName');if(n)n.focus();},50);
+  steps.push({
+    nameSv: t('new_part'), nameEn: t('new_part'),
+    selected: new Set(), defaultId: null, price: 0,
+    search: '', group: '', open: false, isNew: true
+  });
+  renderSteps();
+  renderLayoutVisibility();
+  updateSaveBtn();
+  setTimeout(() => { const n = document.getElementById('newStepName'); if (n) n.focus(); }, 50);
 }
 
-function confirmNewStep(idx){
-  const nameInput=document.getElementById('newStepName');
-  const name=(nameInput?nameInput.value.trim():'')||'Ny del';
-  const block=document.getElementById('step-'+idx);
-  block.classList.remove('new-step');
-  block.innerHTML=`
-    <div class="step-header active-header" onclick="toggleStep(${idx})">
-      <span class="drag-handle">⠿</span>
-      <div class="step-num purple">${idx+1}</div>
-      <span class="step-name">${name}</span>
-      <span class="badge" id="badge-${idx}">0 artiklar</span>
-      <span class="chevron open" id="chev-${idx}">▾</span>
-    </div>
-    <div id="body-${idx}"></div>`;
-  stepCount++;newStepVisible=false;
-  openSteps[idx]=true;
-  pickerState[idx]={selected:new Set(),defaultArticle:null,search:'',group:''};
-  renderPicker(idx);
+function confirmNewStep(idx) {
+  const input = document.getElementById('newStepName');
+  const name = (input ? input.value.trim() : '') || t('new_part');
+  const s = steps[idx];
+  // same name in both languages until user switches
+  s.nameSv = name; s.nameEn = name;
+  s.isNew = false;
+  s.open = true;
   document.getElementById('addStepBtn').classList.remove('disabled');
+  renderSteps();
+  renderLayoutVisibility();
+  updateSaveBtn();
+  bindPickerEvents(idx);
 }
 
-function cancelNewStep(idx){
-  document.getElementById('step-'+idx).remove();
-  newStepVisible=false;
+function cancelNewStep(idx) {
+  steps.splice(idx, 1);
   document.getElementById('addStepBtn').classList.remove('disabled');
+  renderSteps();
+  renderLayoutVisibility();
+  updateSaveBtn();
 }
 
-function showToast(msg){
-  const area=document.getElementById('toastArea');
-  const t=document.createElement('div');
-  t.className='toast';
-  t.innerHTML=`<span>✓</span> ${msg}`;
-  area.appendChild(t);
-  setTimeout(()=>t.remove(),3000);
+function showToast(msg) {
+  const area = document.getElementById('toastArea');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span>✓</span> ${msg}`;
+  area.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
 }
 
-function saveCombo(){
-  const name=document.getElementById('comboName').value||'Stora menyn';
-  document.getElementById('mainCard').style.display='none';
-  const area=document.getElementById('savedArea');
-  area.style.display='block';
-  area.innerHTML=`
+function saveCombo() {
+  if (!isValid()) return;
+  const name = document.getElementById('comboName').value.trim();
+  document.getElementById('mainCard').style.display = 'none';
+  const area = document.getElementById('savedArea');
+  area.style.display = 'block';
+  area.innerHTML = `
     <div class="saved-card">
       <div class="saved-icon-wrap">✓</div>
-      <div class="saved-title">${name} har sparats</div>
-      <div class="saved-sub">Kombinationsartikeln är nu tillgänglig i kassan.</div>
-      <button class="btn btn-primary" onclick="resetAll()">Skapa ny kombinationsartikel</button>
+      <div class="saved-title">${t('saved_title', name)}</div>
+      <div class="saved-sub">${t('saved_sub')}</div>
+      <button class="btn btn-primary" onclick="resetAll()">${t('create_new')}</button>
     </div>`;
 }
 
-function resetAll(){ location.reload(); }
+function resetAll() { location.reload(); }
+
+function setLang(newLang) {
+  if (newLang === lang) return;
+  lang = newLang;
+  localStorage.setItem('lang', lang);
+  renderAll();
+  // re-bind picker events for any open step
+  steps.forEach((s, idx) => { if (s.open) bindPickerEvents(idx); });
+}
+
+/* ---------- init ---------- */
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+document.getElementById('comboName').addEventListener('input', updateSaveBtn);
+renderAll();
 </script>
 </body>
 </html>
