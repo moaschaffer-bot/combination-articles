@@ -227,6 +227,23 @@ select.input {
 .step-num.purple { background: var(--purple); border-color: var(--purple); color: #fff; }
 .step-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
 .step-name.purple-text { color: var(--purple); }
+.step-name.editable {
+  cursor: text;
+  padding: 2px 6px; margin: -2px -6px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  transition: background .1s, border-color .1s;
+}
+.step-name.editable:hover { background: var(--surface); border-color: var(--border-md); }
+.step-name-input {
+  flex: 1;
+  height: 26px;
+  border: 1.5px solid var(--purple); border-radius: 4px;
+  padding: 0 6px; font-size: 13px; font-weight: 500; color: var(--text);
+  background: var(--surface); outline: none; font-family: inherit;
+  box-shadow: 0 0 0 3px rgba(91,79,207,0.12);
+  min-width: 0;
+}
 
 .badge {
   font-size: 11px; padding: 2px 8px;
@@ -703,6 +720,7 @@ const T = {
     create_new: 'Skapa ny kombinationsartikel',
     price_label: 'Pris',
     standard_marker: 'standard',
+    edit_name_tooltip: 'Klicka för att ändra namn',
     name_placeholder: 'T.ex. Stora menyn',
     no_price: 'Sätt pris',
     empty_parts_title: 'Lägg till din första del',
@@ -756,6 +774,7 @@ const T = {
     create_new: 'Create new combination article',
     price_label: 'Price',
     standard_marker: 'default',
+    edit_name_tooltip: 'Click to rename',
     name_placeholder: 'E.g. Big menu',
     no_price: 'Set price',
     empty_parts_title: 'Add your first part',
@@ -903,7 +922,7 @@ function buildStepBlock(step, idx) {
     <div class="step-header${step.open ? ' active-header' : ''}" onclick="toggleStep(${idx})">
       <span class="drag-handle" onclick="event.stopPropagation()">⠿</span>
       <div class="step-num${step.open ? ' purple' : ''}">${idx + 1}</div>
-      <span class="step-name">${stepName(step)}</span>
+      <span class="step-name editable" onclick="startEditName(event, ${idx})" title="${t('edit_name_tooltip')}">${stepName(step)}</span>
       <span class="badge">${t('items', count)}</span>
       ${priceDisplay}
       <span class="chevron${step.open ? ' open' : ''}">▾</span>
@@ -1098,6 +1117,47 @@ function updatePrice(idx, v) {
 function renderTotal() {
   const sum = steps.reduce((acc, s) => acc + (s.price || 0), 0);
   document.getElementById('totalValue').textContent = fmtPrice(sum);
+}
+
+/**
+ * Replace the step name span with an input so users can rename the part
+ * without having to go through the new-step flow again.
+ */
+function startEditName(e, idx) {
+  e.stopPropagation(); // don't toggle the step
+  const block = document.getElementById('step-' + idx);
+  if (!block) return;
+  const span = block.querySelector('.step-name');
+  if (!span || span.tagName === 'INPUT') return;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'step-name-input';
+  input.value = stepName(steps[idx]);
+  input.setAttribute('aria-label', t('part_name_label'));
+  // don't let clicks inside the input toggle the step header
+  input.addEventListener('click', ev => ev.stopPropagation());
+  input.addEventListener('keydown', ev => {
+    if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+    if (ev.key === 'Escape') { ev.preventDefault(); input.dataset.cancel = '1'; input.blur(); }
+  });
+  input.addEventListener('blur', () => commitEditName(idx, input));
+
+  span.replaceWith(input);
+  input.focus();
+  input.select();
+}
+
+function commitEditName(idx, input) {
+  const s = steps[idx];
+  if (!s) return;
+  if (input.dataset.cancel !== '1') {
+    const val = input.value.trim();
+    if (val) { s.nameSv = val; s.nameEn = val; }
+  }
+  // re-render this block to restore the span (preserves header state)
+  renderSteps();
+  if (s.open) bindPickerEvents(idx);
 }
 
 function toggleStep(idx) {
