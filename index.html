@@ -545,7 +545,33 @@ select.input {
   font-size: 11px; color: var(--text-3);
   background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--radius-pill); padding: 3px 10px;
-  margin-left: 1rem;
+}
+
+/* Prototype-only toggle for comparing two design models */
+.proto-toggle {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 2px 2px 2px 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+}
+.proto-toggle-label {
+  font-size: 11px; color: var(--text-3); font-weight: 500;
+  letter-spacing: .02em; margin-right: 2px;
+}
+.proto-toggle-btn {
+  font-size: 11px; font-weight: 500;
+  padding: 3px 10px; border-radius: var(--radius-pill);
+  background: transparent; color: var(--text-2); border: none; cursor: pointer;
+  font-family: inherit;
+  transition: background .15s, color .15s;
+}
+.proto-toggle-btn:hover:not(.active) { color: var(--text); }
+.proto-toggle-btn.active {
+  background: var(--surface); color: var(--text);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  border: 1px solid var(--border-md);
+  font-weight: 600;
 }
 
 @media (max-width: 700px) {
@@ -643,9 +669,14 @@ select.input {
     <div class="breadcrumb">
       <a data-i18n="nav_articles">Articles</a> <span>›</span> <span data-i18n="page_title">Ny kombinationsartikel</span>
     </div>
-    <div style="display:flex;align-items:center">
+    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.75rem">
       <h1 class="page-title" data-i18n="page_title">Ny kombinationsartikel</h1>
       <span class="proto-badge">● <span data-i18n="badge_prototype">Prototyp</span></span>
+      <div class="proto-toggle" role="group" aria-label="VAT model">
+        <span class="proto-toggle-label" data-i18n="vat_model_label">Moms:</span>
+        <button type="button" class="proto-toggle-btn" data-vat-model="locked" data-i18n="vat_model_locked">Låst per del</button>
+        <button type="button" class="proto-toggle-btn" data-vat-model="checkout" data-i18n="vat_model_checkout">Vid beställning</button>
+      </div>
     </div>
   </div>
 
@@ -750,6 +781,9 @@ const T = {
     vat_badge: pct => `${pct}% moms`,
     vat_locked: pct => `Låst till ${pct}% moms`,
     vat_mismatch_tooltip: pct => `${pct}% moms – kan inte blandas i samma del`,
+    vat_model_label: 'Moms:',
+    vat_model_locked: 'Låst per del',
+    vat_model_checkout: 'Vid beställning',
     name_placeholder: 'T.ex. Stora menyn',
     no_price: 'Sätt pris',
     empty_parts_title: 'Lägg till din första del',
@@ -807,6 +841,9 @@ const T = {
     vat_badge: pct => `${pct}% VAT`,
     vat_locked: pct => `Locked to ${pct}% VAT`,
     vat_mismatch_tooltip: pct => `${pct}% VAT — can't mix in the same part`,
+    vat_model_label: 'VAT:',
+    vat_model_locked: 'Locked per part',
+    vat_model_checkout: 'At checkout',
     name_placeholder: 'E.g. Big menu',
     no_price: 'Set price',
     empty_parts_title: 'Add your first part',
@@ -858,10 +895,12 @@ const ARTICLES = [
   {id:20,  sv:'Osttallrik',       en:'Cheese plate',      gSv:'Dessert',    gEn:'Dessert',  vat: 12},
 ];
 /**
- * Returns the VAT rate currently locking this part, or null if no article is
- * selected yet (part is unlocked — any VAT allowed).
+ * Returns the VAT rate currently locking this part, or null if:
+ *   - the part is empty (no lock yet), or
+ *   - the VAT model is 'checkout' (never lock).
  */
 function partVat(step) {
+  if (vatModel !== 'locked') return null;
   if (!step.selected || step.selected.size === 0) return null;
   const firstId = [...step.selected][0];
   const art = ARTICLES.find(a => a.id === firstId);
@@ -879,6 +918,15 @@ function allGroups() {
 
 /* ---------- state ---------- */
 let lang = localStorage.getItem('lang') || 'sv';
+
+/**
+ * VAT model:
+ *   'locked'   — first article in a part locks the VAT for that part; mismatches grayed out.
+ *   'checkout' — no restriction; any article from any VAT can coexist. Proportional moms
+ *                is calculated on whatever the waiter actually picks at checkout.
+ * Prototype-only toggle so the team can compare both models side by side.
+ */
+let vatModel = localStorage.getItem('vatModel') || 'checkout';
 
 /** Start empty — the real flow begins with no parts. */
 let steps = [];
@@ -901,6 +949,9 @@ function renderAll() {
   // lang toggle active state
   document.querySelectorAll('.lang-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.lang === lang));
+  // vat-model toggle active state
+  document.querySelectorAll('.proto-toggle-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.vatModel === vatModel));
   // steps list + empty/total visibility
   renderSteps();
   renderTotal();
@@ -1331,9 +1382,21 @@ function setLang(newLang) {
   steps.forEach((s, idx) => { if (s.open) bindPickerEvents(idx); });
 }
 
+function setVatModel(newModel) {
+  if (newModel === vatModel) return;
+  vatModel = newModel;
+  localStorage.setItem('vatModel', vatModel);
+  renderAll();
+  // re-bind picker events for any open step (renderSteps wiped DOM state)
+  steps.forEach((s, idx) => { if (s.open) bindPickerEvents(idx); });
+}
+
 /* ---------- init ---------- */
 document.querySelectorAll('.lang-btn').forEach(btn => {
   btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+document.querySelectorAll('.proto-toggle-btn').forEach(btn => {
+  btn.addEventListener('click', () => setVatModel(btn.dataset.vatModel));
 });
 document.getElementById('comboName').addEventListener('input', updateSaveBtn);
 renderAll();
