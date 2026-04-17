@@ -260,6 +260,32 @@ select.input {
 }
 .price-badge.empty { color: var(--text-3); font-style: italic; font-weight: 400; }
 
+.vat-badge {
+  font-size: 10px; font-weight: 600; padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface2); color: var(--text-2);
+  border: 1px solid var(--border);
+  letter-spacing: .02em;
+}
+.vat-lock-indicator {
+  font-size: 10px; font-weight: 500; padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--purple-light); color: var(--purple);
+  border: 1px solid rgba(91,79,207,0.2);
+  letter-spacing: .02em;
+}
+.article-row.disabled {
+  opacity: .4; cursor: not-allowed;
+  background: transparent !important;
+}
+.article-row.disabled:hover { background: transparent; }
+.article-row .art-vat {
+  font-size: 10px; font-weight: 600; color: var(--text-3);
+  padding: 1px 6px; border-radius: var(--radius-pill);
+  background: var(--surface2); border: 1px solid var(--border);
+  margin-left: 6px; letter-spacing: .02em;
+}
+
 .chevron { margin-left: auto; font-size: 10px; color: var(--text-3); transition: transform .15s; }
 .chevron.open { transform: rotate(180deg); }
 
@@ -721,6 +747,9 @@ const T = {
     price_label: 'Pris',
     standard_marker: 'standard',
     edit_name_tooltip: 'Klicka för att ändra namn',
+    vat_badge: pct => `${pct}% moms`,
+    vat_locked: pct => `Låst till ${pct}% moms`,
+    vat_mismatch_tooltip: pct => `${pct}% moms – kan inte blandas i samma del`,
     name_placeholder: 'T.ex. Stora menyn',
     no_price: 'Sätt pris',
     empty_parts_title: 'Lägg till din första del',
@@ -775,6 +804,9 @@ const T = {
     price_label: 'Price',
     standard_marker: 'default',
     edit_name_tooltip: 'Click to rename',
+    vat_badge: pct => `${pct}% VAT`,
+    vat_locked: pct => `Locked to ${pct}% VAT`,
+    vat_mismatch_tooltip: pct => `${pct}% VAT — can't mix in the same part`,
     name_placeholder: 'E.g. Big menu',
     no_price: 'Set price',
     empty_parts_title: 'Add your first part',
@@ -797,29 +829,45 @@ function t(key, ...args) {
 }
 
 /* ---------- data ---------- */
+/**
+ * VAT mirrors real Swedish restaurant rates: alcohol 25%, food/non-alcoholic 12%.
+ * Per the product model, VAT is determined by the product group — multiple groups
+ * can share the same VAT rate.
+ */
 const ARTICLES = [
-  {id: 0,  sv:'Husets rödvin',    en:'House red wine',    gSv:'Alkohol',    gEn:'Alcohol'},
-  {id: 1,  sv:'Husets vitvin',    en:'House white wine',  gSv:'Alkohol',    gEn:'Alcohol'},
-  {id: 2,  sv:'Prosecco',         en:'Prosecco',          gSv:'Alkohol',    gEn:'Alcohol'},
-  {id: 3,  sv:'Gin & tonic',      en:'Gin & tonic',       gSv:'Alkohol',    gEn:'Alcohol'},
-  {id: 4,  sv:'Öl',               en:'Beer',              gSv:'Alkohol',    gEn:'Alcohol'},
-  {id: 5,  sv:'Mineralvatten',    en:'Mineral water',     gSv:'Dryck',      gEn:'Drinks'},
-  {id: 6,  sv:'Lemonad',          en:'Lemonade',          gSv:'Dryck',      gEn:'Drinks'},
-  {id: 7,  sv:'Kaffe',            en:'Coffee',            gSv:'Dryck',      gEn:'Drinks'},
-  {id: 8,  sv:'Te',               en:'Tea',               gSv:'Dryck',      gEn:'Drinks'},
-  {id: 9,  sv:'Apelsinjuice',     en:'Orange juice',      gSv:'Dryck',      gEn:'Drinks'},
-  {id:10,  sv:'Laxtataki',        en:'Salmon tataki',     gSv:'Förrätter',  gEn:'Starters'},
-  {id:11,  sv:'Burrata',          en:'Burrata',           gSv:'Förrätter',  gEn:'Starters'},
-  {id:12,  sv:'Säsongens soppa',  en:'Seasonal soup',     gSv:'Förrätter',  gEn:'Starters'},
-  {id:13,  sv:'Ceviche',          en:'Ceviche',           gSv:'Förrätter',  gEn:'Starters'},
-  {id:14,  sv:'Entrecôte',        en:'Entrecôte',         gSv:'Varmrätter', gEn:'Mains'},
-  {id:15,  sv:'Lax',              en:'Salmon',            gSv:'Varmrätter', gEn:'Mains'},
-  {id:16,  sv:'Pasta funghi',     en:'Pasta funghi',      gSv:'Varmrätter', gEn:'Mains'},
-  {id:17,  sv:'Vegetarisk biff',  en:'Vegetarian steak',  gSv:'Varmrätter', gEn:'Mains'},
-  {id:18,  sv:'Chokladfondant',   en:'Chocolate fondant', gSv:'Dessert',    gEn:'Dessert'},
-  {id:19,  sv:'Sorbet',           en:'Sorbet',            gSv:'Dessert',    gEn:'Dessert'},
-  {id:20,  sv:'Osttallrik',       en:'Cheese plate',      gSv:'Dessert',    gEn:'Dessert'},
+  {id: 0,  sv:'Husets rödvin',    en:'House red wine',    gSv:'Alkohol',    gEn:'Alcohol',  vat: 25},
+  {id: 1,  sv:'Husets vitvin',    en:'House white wine',  gSv:'Alkohol',    gEn:'Alcohol',  vat: 25},
+  {id: 2,  sv:'Prosecco',         en:'Prosecco',          gSv:'Alkohol',    gEn:'Alcohol',  vat: 25},
+  {id: 3,  sv:'Gin & tonic',      en:'Gin & tonic',       gSv:'Alkohol',    gEn:'Alcohol',  vat: 25},
+  {id: 4,  sv:'Öl',               en:'Beer',              gSv:'Alkohol',    gEn:'Alcohol',  vat: 25},
+  {id: 5,  sv:'Mineralvatten',    en:'Mineral water',     gSv:'Dryck',      gEn:'Drinks',   vat: 12},
+  {id: 6,  sv:'Lemonad',          en:'Lemonade',          gSv:'Dryck',      gEn:'Drinks',   vat: 12},
+  {id: 7,  sv:'Kaffe',            en:'Coffee',            gSv:'Dryck',      gEn:'Drinks',   vat: 12},
+  {id: 8,  sv:'Te',               en:'Tea',               gSv:'Dryck',      gEn:'Drinks',   vat: 12},
+  {id: 9,  sv:'Apelsinjuice',     en:'Orange juice',      gSv:'Dryck',      gEn:'Drinks',   vat: 12},
+  {id:10,  sv:'Laxtataki',        en:'Salmon tataki',     gSv:'Förrätter',  gEn:'Starters', vat: 12},
+  {id:11,  sv:'Burrata',          en:'Burrata',           gSv:'Förrätter',  gEn:'Starters', vat: 12},
+  {id:12,  sv:'Säsongens soppa',  en:'Seasonal soup',     gSv:'Förrätter',  gEn:'Starters', vat: 12},
+  {id:13,  sv:'Ceviche',          en:'Ceviche',           gSv:'Förrätter',  gEn:'Starters', vat: 12},
+  {id:14,  sv:'Entrecôte',        en:'Entrecôte',         gSv:'Varmrätter', gEn:'Mains',    vat: 12},
+  {id:15,  sv:'Lax',              en:'Salmon',            gSv:'Varmrätter', gEn:'Mains',    vat: 12},
+  {id:16,  sv:'Pasta funghi',     en:'Pasta funghi',      gSv:'Varmrätter', gEn:'Mains',    vat: 12},
+  {id:17,  sv:'Vegetarisk biff',  en:'Vegetarian steak',  gSv:'Varmrätter', gEn:'Mains',    vat: 12},
+  {id:18,  sv:'Chokladfondant',   en:'Chocolate fondant', gSv:'Dessert',    gEn:'Dessert',  vat: 12},
+  {id:19,  sv:'Sorbet',           en:'Sorbet',            gSv:'Dessert',    gEn:'Dessert',  vat: 12},
+  {id:20,  sv:'Osttallrik',       en:'Cheese plate',      gSv:'Dessert',    gEn:'Dessert',  vat: 12},
 ];
+/**
+ * Returns the VAT rate currently locking this part, or null if no article is
+ * selected yet (part is unlocked — any VAT allowed).
+ */
+function partVat(step) {
+  if (!step.selected || step.selected.size === 0) return null;
+  const firstId = [...step.selected][0];
+  const art = ARTICLES.find(a => a.id === firstId);
+  return art ? art.vat : null;
+}
+
 const artName = a => a[lang];
 const artGroup = a => a[lang === 'sv' ? 'gSv' : 'gEn'];
 const artById = id => ARTICLES.find(a => a.id === id);
@@ -918,12 +966,18 @@ function buildStepBlock(step, idx) {
     ? `<span class="price-badge">${fmtPrice(step.price)}</span>`
     : `<span class="price-badge empty">${t('no_price')}</span>`;
 
+  const vat = partVat(step);
+  const vatDisplay = vat !== null
+    ? `<span class="vat-lock-indicator" title="${t('vat_locked', vat)}">${t('vat_badge', vat)}</span>`
+    : '';
+
   const header = `
     <div class="step-header${step.open ? ' active-header' : ''}" onclick="toggleStep(${idx})">
       <span class="drag-handle" onclick="event.stopPropagation()">⠿</span>
       <div class="step-num${step.open ? ' purple' : ''}">${idx + 1}</div>
       <span class="step-name editable" onclick="startEditName(event, ${idx})" title="${t('edit_name_tooltip')}">${stepName(step)}</span>
       <span class="badge">${t('items', count)}</span>
+      ${vatDisplay}
       ${priceDisplay}
       <span class="chevron${step.open ? ' open' : ''}">▾</span>
     </div>`;
@@ -1023,6 +1077,7 @@ function bindPickerEvents(idx) {
 function renderArticleList(idx) {
   const s = steps[idx];
   const key = lang === 'sv' ? 'gSv' : 'gEn';
+  const lockVat = partVat(s); // null if part is empty (no lock yet)
   const filtered = ARTICLES.filter(a =>
     !s.selected.has(a.id) &&
     (!s.search || artName(a).toLowerCase().includes(s.search.toLowerCase())) &&
@@ -1033,12 +1088,18 @@ function renderArticleList(idx) {
   if (filtered.length === 0) {
     list.innerHTML = `<div style="padding:1rem;text-align:center;color:var(--text-3);font-size:12px">—</div>`;
   } else {
-    list.innerHTML = filtered.map(a => `
-      <div class="article-row" onclick="toggleArticle(${idx}, ${a.id})">
+    list.innerHTML = filtered.map(a => {
+      const mismatch = lockVat !== null && a.vat !== lockVat;
+      const title = mismatch ? t('vat_mismatch_tooltip', a.vat) : '';
+      const onclick = mismatch ? '' : `onclick="toggleArticle(${idx}, ${a.id})"`;
+      return `
+      <div class="article-row${mismatch ? ' disabled' : ''}" ${onclick} title="${title}">
         <div class="art-checkbox"></div>
         <span class="art-name">${artName(a)}</span>
         <span class="art-group">${artGroup(a)}</span>
-      </div>`).join('');
+        <span class="art-vat">${t('vat_badge', a.vat)}</span>
+      </div>`;
+    }).join('');
   }
   updatePickerFooter(idx);
 }
@@ -1075,12 +1136,32 @@ function setDefault(e, idx, id) {
 }
 
 function updateBadgeAndHeader(idx) {
-  // Re-render just this step block's header badge without full remount,
-  // to avoid losing focus in the search input.
+  // Update header bits in place to avoid losing focus in the search input.
   const block = document.getElementById('step-' + idx);
   if (!block) return;
-  const badge = block.querySelector('.step-header .badge');
-  if (badge) badge.textContent = t('items', steps[idx].selected.size);
+  const s = steps[idx];
+  const header = block.querySelector('.step-header');
+  const badge = header && header.querySelector('.badge');
+  if (badge) badge.textContent = t('items', s.selected.size);
+
+  // VAT lock badge lives between .badge and .price-badge. Sync it with state.
+  const vat = partVat(s);
+  let vatEl = header && header.querySelector('.vat-lock-indicator');
+  if (header) {
+    if (vat !== null) {
+      if (!vatEl) {
+        vatEl = document.createElement('span');
+        vatEl.className = 'vat-lock-indicator';
+        const price = header.querySelector('.price-badge');
+        header.insertBefore(vatEl, price);
+      }
+      vatEl.textContent = t('vat_badge', vat);
+      vatEl.title = t('vat_locked', vat);
+    } else if (vatEl) {
+      vatEl.remove();
+    }
+  }
+
   updatePickerFooter(idx);
   updateSaveBtn();
 }
