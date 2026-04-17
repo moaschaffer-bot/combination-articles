@@ -26,7 +26,7 @@ Flödet för att skapa en ny kombinationsartikel i BackOffice:
 
 ## GitHub Pages
 
-Prototypen är live på: `https://[ditt-användarnamn].github.io/kombination-proto`
+Prototypen är live på: https://moaschaffer-bot.github.io/combination-articles/
 
 ## Designspråk
 
