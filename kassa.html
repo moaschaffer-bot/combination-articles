@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kassa — Kombinationsartiklar</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --purple: #5B4FCF;
+  --purple-light: #EEECf9;
+  --purple-mid: #7B6FDF;
+  --purple-dark: #3D338F;
+  --bg: #F0EFF5;
+  --surface: #FFFFFF;
+  --surface2: #F5F4F8;
+  --border: rgba(0,0,0,0.08);
+  --border-md: rgba(0,0,0,0.14);
+  --text: #1A1825;
+  --text-2: #6B677A;
+  --text-3: #A09CB0;
+  --green: #1A8A4A;
+  --green-bg: #E8F6EE;
+  --green-text: #135C32;
+  --green-border: rgba(26,138,74,0.2);
+  --radius: 8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+  --radius-pill: 99px;
+  --topbar-h: 52px;
+  --cart-w: 360px;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow: hidden;
+}
+
+/* TOPBAR */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 1.25rem;
+  gap: 1rem;
+}
+.topbar-logo { display: flex; align-items: center; }
+.topbar-logo .open-text {
+  font-size: 17px; letter-spacing: -.04em; font-weight: 800;
+}
+.topbar-logo .ka-text {
+  font-size: 10px; font-weight: 600; color: var(--text-2);
+  margin-left: 4px; margin-top: 2px; letter-spacing: .02em;
+}
+.topbar-table {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: 13px; color: var(--text);
+  padding: 4px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+}
+.topbar-table .table-num { font-weight: 700; color: var(--purple); }
+.topbar-time { font-size: 13px; color: var(--text-2); margin-left: auto; font-variant-numeric: tabular-nums; }
+.topbar-right { display: flex; align-items: center; gap: 1rem; }
+.topbar-link {
+  font-size: 12px; color: var(--text-2); text-decoration: none;
+  padding: 4px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-md);
+}
+.topbar-link:hover { color: var(--purple); border-color: var(--purple); background: var(--purple-light); }
+.topbar-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border-md);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 600; color: var(--text-2);
+}
+
+/* LANGUAGE TOGGLE */
+.lang-toggle {
+  display: flex; align-items: center;
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-pill);
+  padding: 2px;
+  gap: 2px;
+  background: var(--surface2);
+}
+.lang-btn {
+  padding: 3px 10px; font-size: 11px; font-weight: 600;
+  border-radius: var(--radius-pill);
+  color: var(--text-3); cursor: pointer; background: transparent; border: none;
+  font-family: inherit; letter-spacing: .02em;
+  transition: background .15s, color .15s;
+}
+.lang-btn.active { background: var(--purple); color: #fff; }
+.lang-btn:not(.active):hover { color: var(--text-2); }
+
+/* MAIN LAYOUT */
+.main {
+  position: fixed; top: var(--topbar-h); left: 0; right: 0; bottom: 0;
+  display: flex;
+}
+
+/* CART PANEL */
+.cart {
+  width: var(--cart-w); flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+.cart-header {
+  padding: 1rem 1.25rem .75rem;
+  border-bottom: 1px solid var(--border);
+}
+.cart-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.cart-meta { font-size: 12px; color: var(--text-2); margin-top: 2px; }
+
+.receipt-mode-row {
+  display: flex; align-items: center; gap: .5rem;
+  padding: .5rem 1.25rem;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+}
+.receipt-mode-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: .07em; font-weight: 600; }
+.receipt-mode-toggle {
+  display: inline-flex; align-items: center;
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-pill);
+  padding: 2px;
+  gap: 2px;
+  background: var(--surface);
+  margin-left: auto;
+}
+.receipt-mode-btn {
+  padding: 3px 10px; font-size: 11px; font-weight: 500;
+  border-radius: var(--radius-pill);
+  color: var(--text-2); cursor: pointer; background: transparent; border: none;
+  font-family: inherit;
+  transition: background .15s, color .15s;
+}
+.receipt-mode-btn.active { background: var(--purple); color: #fff; font-weight: 600; }
+
+.cart-items {
+  flex: 1; overflow-y: auto;
+  padding: .5rem 0;
+}
+.cart-empty {
+  padding: 3rem 1.25rem;
+  text-align: center;
+  color: var(--text-3);
+  font-size: 13px;
+}
+.cart-line {
+  padding: .625rem 1.25rem;
+  display: flex; align-items: baseline;
+  gap: .5rem;
+  border-bottom: 1px solid var(--border);
+}
+.cart-line:hover { background: var(--surface2); }
+.cart-line-name { flex: 1; font-size: 13px; color: var(--text); }
+.cart-line-name.bold { font-weight: 600; }
+.cart-line-price {
+  font-size: 13px; color: var(--text); font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.cart-sub-line {
+  padding: .25rem 1.25rem .25rem 2.25rem;
+  display: flex; align-items: baseline;
+  gap: .5rem;
+  font-size: 12px; color: var(--text-2);
+}
+.cart-sub-line .cart-line-name { font-size: 12px; color: var(--text-2); }
+.cart-sub-line .cart-line-price { font-size: 12px; color: var(--text-2); }
+.cart-sub-group { padding-bottom: .375rem; border-bottom: 1px solid var(--border); }
+
+.cart-footer {
+  border-top: 1px solid var(--border);
+  padding: .75rem 1.25rem 1rem;
+}
+.cart-total-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  font-size: 15px; font-weight: 700; color: var(--text);
+  margin-bottom: .25rem;
+  font-variant-numeric: tabular-nums;
+}
+.cart-vat-row {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--text-2);
+  font-variant-numeric: tabular-nums;
+}
+.cart-actions { display: flex; gap: .5rem; margin-top: .875rem; }
+.btn {
+  height: 38px; padding: 0 16px;
+  border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  font-family: inherit;
+  transition: opacity .15s, transform .1s, background .15s;
+}
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--purple); color: #fff; flex: 1; }
+.btn-primary:hover { background: var(--purple-dark); }
+.btn-primary:disabled { opacity: .4; cursor: default; pointer-events: none; }
+.btn-ghost {
+  background: transparent; color: var(--text-2);
+  border: 1px solid var(--border-md);
+}
+.btn-ghost:hover { background: var(--surface2); }
+.btn-lg { height: 46px; font-size: 14px; padding: 0 20px; }
+
+/* RIGHT PANEL — articles */
+.articles {
+  flex: 1; display: flex; flex-direction: column; min-width: 0;
+}
+.cat-tabs {
+  display: flex; gap: 2px;
+  padding: .75rem 1.25rem 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+}
+.cat-tab {
+  padding: .625rem 1rem;
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  background: transparent; border: none; cursor: pointer;
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  font-family: inherit;
+  position: relative; bottom: -1px;
+  border-bottom: 2px solid transparent;
+}
+.cat-tab:hover { color: var(--text); }
+.cat-tab.active {
+  color: var(--purple); border-bottom-color: var(--purple);
+  font-weight: 600;
+}
+
+.article-grid {
+  flex: 1; overflow-y: auto;
+  padding: 1rem 1.25rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: .625rem;
+  align-content: start;
+}
+.art-btn {
+  height: 90px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: .75rem;
+  cursor: pointer;
+  display: flex; flex-direction: column; justify-content: space-between;
+  text-align: left;
+  font-family: inherit;
+  transition: border-color .15s, transform .1s, box-shadow .15s;
+}
+.art-btn:hover {
+  border-color: var(--purple);
+  box-shadow: 0 2px 8px rgba(91,79,207,0.08);
+}
+.art-btn:active { transform: scale(.98); }
+.art-btn-name { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.art-btn-price {
+  font-size: 12px; color: var(--text-2); font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.art-btn.combo {
+  background: linear-gradient(135deg, var(--purple-light) 0%, #F8F7FC 100%);
+  border-color: rgba(91,79,207,0.25);
+  height: 110px;
+}
+.art-btn.combo .art-btn-name { color: var(--purple-dark); font-size: 14px; }
+.art-btn.combo .art-btn-price { color: var(--purple); }
+.art-btn.combo:hover { border-color: var(--purple); box-shadow: 0 2px 12px rgba(91,79,207,0.15); }
+.combo-badge {
+  display: inline-block;
+  font-size: 9px; font-weight: 700;
+  padding: 2px 6px; border-radius: var(--radius-pill);
+  background: var(--purple); color: #fff;
+  letter-spacing: .05em;
+  align-self: flex-start;
+}
+.art-btn.disabled {
+  opacity: .55; cursor: not-allowed;
+  background: var(--surface2);
+}
+.art-btn.disabled:hover { border-color: var(--border); box-shadow: none; }
+
+/* MODAL — stepper */
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: rgba(20,18,30,0.45);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .15s;
+}
+.modal-backdrop.open { opacity: 1; pointer-events: auto; }
+
+.modal {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  width: min(720px, calc(100% - 2rem));
+  max-height: calc(100% - 4rem);
+  display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(20,18,30,0.3);
+  transform: translateY(8px);
+  transition: transform .2s;
+}
+.modal-backdrop.open .modal { transform: translateY(0); }
+
+.modal-header {
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 1rem;
+}
+.modal-title-block { flex: 1; }
+.modal-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.modal-step-label { font-size: 12px; color: var(--text-3); margin-top: 2px; }
+.modal-close {
+  width: 32px; height: 32px;
+  border: none; background: transparent; cursor: pointer;
+  border-radius: 50%; color: var(--text-2);
+  font-size: 20px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .1s;
+}
+.modal-close:hover { background: var(--surface2); color: var(--text); }
+
+.step-dots {
+  display: flex; gap: 6px;
+  padding: 0 1.5rem; margin-top: -.25rem; padding-top: .875rem;
+}
+.step-dot {
+  height: 4px; flex: 1;
+  background: var(--border);
+  border-radius: 2px;
+  transition: background .2s;
+}
+.step-dot.done { background: var(--purple); }
+.step-dot.current { background: var(--purple); }
+.step-dot.future { background: var(--border); }
+
+.modal-body {
+  flex: 1; overflow-y: auto;
+  padding: 1.5rem;
+}
+
+.step-question {
+  font-size: 20px; font-weight: 600; color: var(--text);
+  margin-bottom: .25rem;
+  letter-spacing: -.01em;
+}
+.step-hint {
+  font-size: 13px; color: var(--text-2);
+  margin-bottom: 1.25rem;
+}
+.step-hint .default-name { color: var(--purple); font-weight: 500; }
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: .75rem;
+}
+.choice-card {
+  position: relative;
+  background: var(--surface);
+  border: 1.5px solid var(--border-md);
+  border-radius: var(--radius);
+  padding: 1rem;
+  cursor: pointer;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 90px;
+  font-family: inherit;
+  text-align: left;
+  transition: border-color .15s, background .15s, transform .1s;
+}
+.choice-card:hover { border-color: var(--purple-mid); background: var(--surface); }
+.choice-card:active { transform: scale(.98); }
+.choice-card.selected {
+  border-color: var(--purple);
+  background: var(--purple-light);
+}
+.choice-card.selected::after {
+  content: '✓';
+  position: absolute; top: 8px; right: 10px;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--purple); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700;
+}
+.choice-card.default-pick:not(.selected)::after {
+  content: attr(data-default-label);
+  position: absolute; top: 8px; right: 10px;
+  font-size: 9px; font-weight: 700;
+  background: var(--surface2); color: var(--text-2);
+  border: 1px solid var(--border);
+  padding: 2px 6px; border-radius: var(--radius-pill);
+  letter-spacing: .05em;
+}
+.choice-name { font-size: 14px; font-weight: 600; color: var(--text); padding-right: 30px; }
+.choice-meta { font-size: 11px; color: var(--text-2); margin-top: 4px; }
+
+.modal-footer {
+  border-top: 1px solid var(--border);
+  padding: 1rem 1.5rem;
+  display: flex; align-items: center; gap: .75rem;
+}
+.modal-footer .summary {
+  font-size: 13px; color: var(--text-2);
+  margin-right: auto;
+  font-variant-numeric: tabular-nums;
+}
+.modal-footer .summary .total-amount { font-weight: 700; color: var(--text); }
+
+/* TOAST */
+.toast-area {
+  position: fixed; top: calc(var(--topbar-h) + 1rem);
+  left: 50%; transform: translateX(-50%);
+  z-index: 600;
+  display: flex; flex-direction: column; gap: .5rem;
+  pointer-events: none;
+}
+.toast {
+  pointer-events: auto;
+  display: flex; align-items: center; gap: .5rem;
+  padding: .625rem 1rem;
+  background: var(--green-bg); border: 1px solid var(--green-border);
+  border-radius: var(--radius-sm); font-size: 13px; color: var(--green-text);
+  box-shadow: 0 4px 16px rgba(20,18,30,0.08);
+  animation: slideIn .2s ease;
+}
+@keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+.proto-badge {
+  display: inline-flex; align-items: center; gap: .375rem;
+  font-size: 10px; color: var(--text-3);
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: var(--radius-pill); padding: 2px 8px;
+}
+
+/* Responsive — stack on small screens */
+@media (max-width: 880px) {
+  .main { flex-direction: column; }
+  .cart {
+    width: 100%; border-right: none; border-bottom: 1px solid var(--border);
+    max-height: 40vh;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">
+    <span class="open-text">OPEN</span>
+    <span class="ka-text" data-i18n="kassa_label">KASSA</span>
+  </div>
+  <span class="proto-badge">● <span data-i18n="badge_prototype">Prototyp</span></span>
+  <div class="topbar-table">
+    <span data-i18n="table_label">Bord</span>
+    <span class="table-num">12</span>
+    <span style="color:var(--text-3)">·</span>
+    <span><span data-i18n="guests_count">4 gäster</span></span>
+  </div>
+  <span class="topbar-time" id="topbarTime">—</span>
+  <div class="topbar-right">
+    <a href="index.html" class="topbar-link" data-i18n="link_backoffice">← BackOffice</a>
+    <div class="lang-toggle" role="group" aria-label="Language">
+      <button type="button" class="lang-btn" data-lang="sv">SV</button>
+      <button type="button" class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <div class="topbar-avatar">MS</div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-area" id="toastArea"></div>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- CART -->
+  <div class="cart">
+    <div class="cart-header">
+      <div class="cart-title" data-i18n="cart_title">Beställning</div>
+      <div class="cart-meta"><span data-i18n="server_name">Maria S.</span> · <span class="topbar-time">—</span></div>
+    </div>
+    <div class="receipt-mode-row">
+      <span class="receipt-mode-label" data-i18n="receipt_mode_label">Kvittovisning</span>
+      <div class="receipt-mode-toggle" role="group">
+        <button type="button" class="receipt-mode-btn" data-receipt="itemized" data-i18n="receipt_per_part">Per del</button>
+        <button type="button" class="receipt-mode-btn" data-receipt="total" data-i18n="receipt_total">Totalpris</button>
+      </div>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span data-i18n="total_label">Totalt</span>
+        <span id="cartTotal">0 kr</span>
+      </div>
+      <div class="cart-vat-row">
+        <span data-i18n="vat_label">Varav moms</span>
+        <span id="cartVat">0 kr</span>
+      </div>
+      <div class="cart-actions">
+        <button class="btn btn-ghost" onclick="clearCart()" data-i18n="clear_cart">Töm</button>
+        <button class="btn btn-primary" id="payBtn" onclick="pay()" data-i18n="pay">Betala</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARTICLES -->
+  <div class="articles">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="article-grid" id="articleGrid"></div>
+  </div>
+</div>
+
+<!-- MODAL — STEPPER -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div class="modal-title-block">
+        <div class="modal-title" id="modalTitle">—</div>
+        <div class="modal-step-label" id="modalStepLabel">—</div>
+      </div>
+      <button class="modal-close" onclick="closeModal()" aria-label="Close">×</button>
+    </div>
+    <div class="step-dots" id="stepDots"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer">
+      <span class="summary" id="modalSummary"></span>
+      <button class="btn btn-ghost" id="prevBtn" onclick="prevStep()" data-i18n="prev">← Föregående</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" data-i18n="next">Nästa →</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------- i18n ---------- */
+const T = {
+  sv: {
+    kassa_label: 'KASSA',
+    badge_prototype: 'Prototyp',
+    table_label: 'Bord',
+    guests_count: '4 gäster',
+    link_backoffice: '← BackOffice',
+    cart_title: 'Beställning',
+    server_name: 'Maria S.',
+    receipt_mode_label: 'Kvittovisning',
+    receipt_per_part: 'Per del',
+    receipt_total: 'Totalpris',
+    total_label: 'Totalt',
+    vat_label: 'Varav moms',
+    clear_cart: 'Töm',
+    pay: 'Betala',
+    cart_empty: 'Inga artiklar än. Tryck på en knapp för att lägga till.',
+    cat_menyer: 'Menyer',
+    cat_starters: 'Förrätter',
+    cat_mains: 'Varmrätter',
+    cat_desserts: 'Dessert',
+    cat_drinks: 'Drycker',
+    combo_badge: 'MENY',
+    parts_count: n => `${n} delar`,
+    prev: '← Föregående',
+    next: 'Nästa →',
+    add_to_order: name => `Lägg till – ${name}`,
+    step_of: (cur, total) => `Steg ${cur} av ${total}`,
+    choose_for_part: name => `Välj ${name.toLowerCase()}`,
+    default_hint: name => `Standard: `,
+    default_marker: 'Standard',
+    summary_total: total => `Totalt: ${total} kr`,
+    toast_added: name => `${name} lades till i beställningen`,
+    toast_paid: 'Beställningen skickad till köket',
+    coming_soon: 'Endast demonstration — denna kategori är inte byggd',
+  },
+  en: {
+    kassa_label: 'REGISTER',
+    badge_prototype: 'Prototype',
+    table_label: 'Table',
+    guests_count: '4 guests',
+    link_backoffice: '← BackOffice',
+    cart_title: 'Order',
+    server_name: 'Maria S.',
+    receipt_mode_label: 'Receipt',
+    receipt_per_part: 'Per part',
+    receipt_total: 'Total price',
+    total_label: 'Total',
+    vat_label: 'Of which VAT',
+    clear_cart: 'Clear',
+    pay: 'Pay',
+    cart_empty: 'No articles yet. Tap a button to add.',
+    cat_menyer: 'Menus',
+    cat_starters: 'Starters',
+    cat_mains: 'Mains',
+    cat_desserts: 'Desserts',
+    cat_drinks: 'Drinks',
+    combo_badge: 'MENU',
+    parts_count: n => `${n} parts`,
+    prev: '← Back',
+    next: 'Next →',
+    add_to_order: name => `Add – ${name}`,
+    step_of: (cur, total) => `Step ${cur} of ${total}`,
+    choose_for_part: name => `Choose ${name.toLowerCase()}`,
+    default_hint: name => `Default: `,
+    default_marker: 'Default',
+    summary_total: total => `Total: ${total} kr`,
+    toast_added: name => `${name} added to the order`,
+    toast_paid: 'Order sent to the kitchen',
+    coming_soon: 'Demo only — this category is not built',
+  },
+};
+
+function t(key, ...args) {
+  const entry = T[lang][key];
+  if (typeof entry === 'function') return entry(...args);
+  return entry ?? key;
+}
+
+/* ---------- data ---------- */
+/**
+ * The "Stora menyn" combination matches the BackOffice prototype: 3 mandatory
+ * parts, each with a default and a manual price. Total = sum of part prices.
+ * VAT mirrors real Swedish restaurant rates: alcohol 25%, food 12%.
+ */
+const COMBO = {
+  id: 'big-menu',
+  sv: 'Stora menyn',
+  en: 'Big menu',
+  parts: [
+    {
+      sv: 'Förrätt', en: 'Starter', price: 80, vat: 12, defaultIdx: 0,
+      articles: [
+        {sv:'Laxtataki',       en:'Salmon tataki',  vat:12},
+        {sv:'Burrata',         en:'Burrata',        vat:12},
+        {sv:'Säsongens soppa', en:'Seasonal soup',  vat:12},
+        {sv:'Ceviche',         en:'Ceviche',        vat:12},
+      ],
+    },
+    {
+      sv: 'Varmrätt', en: 'Main', price: 150, vat: 12, defaultIdx: 0,
+      articles: [
+        {sv:'Entrecôte',       en:'Entrecôte',         vat:12},
+        {sv:'Lax',             en:'Salmon',            vat:12},
+        {sv:'Pasta funghi',    en:'Pasta funghi',      vat:12},
+        {sv:'Vegetarisk biff', en:'Vegetarian steak',  vat:12},
+      ],
+    },
+    {
+      sv: 'Dessert', en: 'Dessert', price: 60, vat: 12, defaultIdx: 0,
+      articles: [
+        {sv:'Chokladfondant',  en:'Chocolate fondant', vat:12},
+        {sv:'Sorbet',          en:'Sorbet',            vat:12},
+        {sv:'Osttallrik',      en:'Cheese plate',      vat:12},
+      ],
+    },
+  ],
+};
+
+/** Other "regular" articles, shown in their tabs as scaffolding. */
+const OTHER_ARTICLES = {
+  starters: [
+    {sv:'Laxtataki',       en:'Salmon tataki',  price: 95,  vat:12},
+    {sv:'Burrata',         en:'Burrata',        price: 110, vat:12},
+    {sv:'Säsongens soppa', en:'Seasonal soup',  price: 85,  vat:12},
+    {sv:'Ceviche',         en:'Ceviche',        price: 105, vat:12},
+  ],
+  mains: [
+    {sv:'Entrecôte',       en:'Entrecôte',        price: 245, vat:12},
+    {sv:'Lax',             en:'Salmon',           price: 195, vat:12},
+    {sv:'Pasta funghi',    en:'Pasta funghi',     price: 165, vat:12},
+    {sv:'Vegetarisk biff', en:'Vegetarian steak', price: 175, vat:12},
+  ],
+  desserts: [
+    {sv:'Chokladfondant',  en:'Chocolate fondant', price: 85,  vat:12},
+    {sv:'Sorbet',          en:'Sorbet',            price: 65,  vat:12},
+    {sv:'Osttallrik',      en:'Cheese plate',      price: 110, vat:12},
+  ],
+  drinks: [
+    {sv:'Husets rödvin', en:'House red wine',  price: 95, vat:25},
+    {sv:'Husets vitvin', en:'House white wine', price: 95, vat:25},
+    {sv:'Öl',            en:'Beer',             price: 75, vat:25},
+    {sv:'Mineralvatten', en:'Mineral water',    price: 35, vat:12},
+    {sv:'Kaffe',         en:'Coffee',           price: 35, vat:12},
+  ],
+};
+
+const CATEGORIES = ['menyer', 'starters', 'mains', 'desserts', 'drinks'];
+const CAT_LABEL = {
+  menyer: 'cat_menyer',
+  starters: 'cat_starters',
+  mains: 'cat_mains',
+  desserts: 'cat_desserts',
+  drinks: 'cat_drinks',
+};
+
+const artName = a => a[lang];
+const partName = p => p[lang];
+const comboName = () => COMBO[lang];
+
+function fmtKr(n) { return Math.round(n) + ' kr'; }
+
+/* ---------- state ---------- */
+let lang = localStorage.getItem('lang') || 'sv';
+let receiptMode = localStorage.getItem('receiptMode') || 'itemized'; // 'itemized' | 'total'
+let activeCategory = 'menyer';
+let cart = []; // each item: { type:'combo', combo, picks:[idx,...] } | { type:'single', article, price }
+
+/** In-flight stepper state when a combo is being configured. */
+let stepperState = null; // { combo, stepIdx, picks: [number,...] }
+
+/* ---------- render ---------- */
+function renderAll() {
+  document.documentElement.setAttribute('lang', lang);
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    el.textContent = t(key);
+  });
+  document.querySelectorAll('.lang-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.lang === lang));
+  document.querySelectorAll('.receipt-mode-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.receipt === receiptMode));
+  renderCategoryTabs();
+  renderArticleGrid();
+  renderCart();
+  if (stepperState) renderStepper();
+}
+
+function renderCategoryTabs() {
+  const tabs = document.getElementById('catTabs');
+  tabs.innerHTML = CATEGORIES.map(c =>
+    `<button class="cat-tab${c === activeCategory ? ' active' : ''}" onclick="setCategory('${c}')">${t(CAT_LABEL[c])}</button>`
+  ).join('');
+}
+
+function setCategory(c) {
+  activeCategory = c;
+  renderCategoryTabs();
+  renderArticleGrid();
+}
+
+function renderArticleGrid() {
+  const grid = document.getElementById('articleGrid');
+  if (activeCategory === 'menyer') {
+    grid.innerHTML = `
+      <button class="art-btn combo" onclick="openCombo()">
+        <span class="combo-badge">${t('combo_badge')}</span>
+        <div>
+          <div class="art-btn-name">${comboName()}</div>
+          <div class="art-btn-price">${fmtKr(comboTotal())} · ${t('parts_count', COMBO.parts.length)}</div>
+        </div>
+      </button>
+      <button class="art-btn disabled" title="${t('coming_soon')}">
+        <span class="combo-badge" style="background:var(--text-3)">${t('combo_badge')}</span>
+        <div>
+          <div class="art-btn-name" style="color:var(--text-3)">${lang === 'sv' ? 'Lunchmeny' : 'Lunch menu'}</div>
+          <div class="art-btn-price" style="color:var(--text-3)">—</div>
+        </div>
+      </button>`;
+    return;
+  }
+  const list = OTHER_ARTICLES[activeCategory] || [];
+  grid.innerHTML = list.map((a, i) => `
+    <button class="art-btn" onclick="addSingle('${activeCategory}', ${i})">
+      <div class="art-btn-name">${artName(a)}</div>
+      <div class="art-btn-price">${fmtKr(a.price)}</div>
+    </button>`).join('');
+}
+
+function comboTotal() {
+  return COMBO.parts.reduce((s, p) => s + p.price, 0);
+}
+
+/* ---------- cart ---------- */
+function addSingle(cat, idx) {
+  const article = OTHER_ARTICLES[cat][idx];
+  cart.push({ type: 'single', article, price: article.price, vat: article.vat });
+  showToast(t('toast_added', artName(article)));
+  renderCart();
+}
+
+function clearCart() {
+  cart = [];
+  renderCart();
+}
+
+function pay() {
+  if (cart.length === 0) return;
+  showToast(t('toast_paid'));
+  cart = [];
+  renderCart();
+}
+
+function renderCart() {
+  const items = document.getElementById('cartItems');
+  if (cart.length === 0) {
+    items.innerHTML = `<div class="cart-empty">${t('cart_empty')}</div>`;
+  } else {
+    items.innerHTML = cart.map((it, i) => renderCartLine(it, i)).join('');
+  }
+  const total = cart.reduce((s, it) => s + (it.type === 'combo' ? comboTotal() : it.price), 0);
+  const vat = cart.reduce((s, it) => s + cartLineVat(it), 0);
+  document.getElementById('cartTotal').textContent = fmtKr(total);
+  document.getElementById('cartVat').textContent = fmtKr(vat);
+  document.getElementById('payBtn').disabled = cart.length === 0;
+}
+
+/** VAT extracted from a cart line (proportional per article share for combos). */
+function cartLineVat(it) {
+  if (it.type === 'single') {
+    return it.price * it.vat / (100 + it.vat);
+  }
+  // combo — sum each part's VAT contribution
+  return it.combo.parts.reduce((s, p) => s + (p.price * p.vat / (100 + p.vat)), 0);
+}
+
+function renderCartLine(it, i) {
+  if (it.type === 'single') {
+    return `
+      <div class="cart-line">
+        <span class="cart-line-name">${artName(it.article)}</span>
+        <span class="cart-line-price">${fmtKr(it.price)}</span>
+      </div>`;
+  }
+  // combo
+  if (receiptMode === 'total') {
+    return `
+      <div class="cart-line">
+        <span class="cart-line-name bold">${comboName()}</span>
+        <span class="cart-line-price">${fmtKr(comboTotal())}</span>
+      </div>`;
+  }
+  // itemized
+  const subs = it.combo.parts.map((p, idx) => {
+    const picked = p.articles[it.picks[idx]];
+    return `<div class="cart-sub-line">
+      <span class="cart-line-name">${partName(p)}: ${artName(picked)}</span>
+      <span class="cart-line-price">${fmtKr(p.price)}</span>
+    </div>`;
+  }).join('');
+  return `
+    <div class="cart-sub-group">
+      <div class="cart-line">
+        <span class="cart-line-name bold">${comboName()}</span>
+        <span class="cart-line-price">${fmtKr(comboTotal())}</span>
+      </div>
+      ${subs}
+    </div>`;
+}
+
+/* ---------- stepper modal ---------- */
+function openCombo() {
+  stepperState = {
+    combo: COMBO,
+    stepIdx: 0,
+    picks: COMBO.parts.map(p => p.defaultIdx),
+  };
+  document.getElementById('modalBackdrop').classList.add('open');
+  renderStepper();
+}
+
+function closeModal() {
+  document.getElementById('modalBackdrop').classList.remove('open');
+  stepperState = null;
+}
+
+function renderStepper() {
+  if (!stepperState) return;
+  const { combo, stepIdx, picks } = stepperState;
+  const part = combo.parts[stepIdx];
+  const isLast = stepIdx === combo.parts.length - 1;
+
+  document.getElementById('modalTitle').textContent = comboName();
+  document.getElementById('modalStepLabel').textContent =
+    t('step_of', stepIdx + 1, combo.parts.length);
+
+  // dots
+  const dots = combo.parts.map((_, i) => {
+    if (i < stepIdx) return '<div class="step-dot done"></div>';
+    if (i === stepIdx) return '<div class="step-dot current"></div>';
+    return '<div class="step-dot future"></div>';
+  }).join('');
+  document.getElementById('stepDots').innerHTML = dots;
+
+  // body
+  const defaultArt = part.articles[part.defaultIdx];
+  const cards = part.articles.map((a, i) => {
+    const isSelected = picks[stepIdx] === i;
+    const isDefault = i === part.defaultIdx;
+    return `
+      <button class="choice-card${isSelected ? ' selected' : ''}${isDefault ? ' default-pick' : ''}"
+              data-default-label="${t('default_marker').toUpperCase()}"
+              onclick="pickArticle(${i})">
+        <div class="choice-name">${artName(a)}</div>
+        <div class="choice-meta">${a.vat}% ${lang === 'sv' ? 'moms' : 'VAT'}</div>
+      </button>`;
+  }).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="step-question">${t('choose_for_part', partName(part))}</div>
+    <div class="step-hint">
+      ${t('default_hint')}<span class="default-name">${artName(defaultArt)}</span> · ${fmtKr(part.price)}
+    </div>
+    <div class="choice-grid">${cards}</div>`;
+
+  // footer
+  document.getElementById('modalSummary').innerHTML =
+    `<span class="total-amount">${t('summary_total', comboTotal())}</span>`;
+  document.getElementById('prevBtn').style.visibility = stepIdx === 0 ? 'hidden' : 'visible';
+  const nextBtn = document.getElementById('nextBtn');
+  if (isLast) {
+    nextBtn.textContent = t('add_to_order', comboName());
+  } else {
+    nextBtn.textContent = t('next');
+  }
+}
+
+function pickArticle(i) {
+  if (!stepperState) return;
+  stepperState.picks[stepperState.stepIdx] = i;
+  renderStepper();
+}
+
+function prevStep() {
+  if (!stepperState || stepperState.stepIdx === 0) return;
+  stepperState.stepIdx--;
+  renderStepper();
+}
+
+function nextStep() {
+  if (!stepperState) return;
+  const isLast = stepperState.stepIdx === stepperState.combo.parts.length - 1;
+  if (!isLast) {
+    stepperState.stepIdx++;
+    renderStepper();
+    return;
+  }
+  // commit
+  cart.push({
+    type: 'combo',
+    combo: stepperState.combo,
+    picks: stepperState.picks.slice(),
+  });
+  showToast(t('toast_added', comboName()));
+  closeModal();
+  renderCart();
+}
+
+/* ---------- toggles ---------- */
+function setLang(newLang) {
+  if (newLang === lang) return;
+  lang = newLang;
+  localStorage.setItem('lang', lang);
+  renderAll();
+}
+
+function setReceiptMode(mode) {
+  if (mode === receiptMode) return;
+  receiptMode = mode;
+  localStorage.setItem('receiptMode', receiptMode);
+  renderAll();
+}
+
+/* ---------- toasts ---------- */
+function showToast(msg) {
+  const area = document.getElementById('toastArea');
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.innerHTML = `<span>✓</span> ${msg}`;
+  area.appendChild(toast);
+  setTimeout(() => toast.remove(), 2400);
+}
+
+/* ---------- clock ---------- */
+function tickClock() {
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.querySelectorAll('.topbar-time').forEach(el => el.textContent = `${hh}:${mm}`);
+}
+
+/* ---------- init ---------- */
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => setLang(btn.dataset.lang));
+});
+document.querySelectorAll('.receipt-mode-btn').forEach(btn => {
+  btn.addEventListener('click', () => setReceiptMode(btn.dataset.receipt));
+});
+document.getElementById('modalBackdrop').addEventListener('click', e => {
+  if (e.target.id === 'modalBackdrop') closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (!stepperState) return;
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'ArrowLeft') prevStep();
+  if (e.key === 'ArrowRight') nextStep();
+});
+tickClock();
+setInterval(tickClock, 30000);
+renderAll();
+</script>
+</body>
+</html>

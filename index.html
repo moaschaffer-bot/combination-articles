@@ -68,6 +68,14 @@ body {
   margin-left: 4px; margin-top: 2px; letter-spacing: .02em;
 }
 .topbar-right { margin-left: auto; display: flex; align-items: center; gap: 1rem; }
+.topbar-kassa-link {
+  font-size: 12px; color: var(--text-2); text-decoration: none;
+  padding: 4px 10px; border-radius: var(--radius-sm);
+  border: 1px solid var(--border-md);
+  font-weight: 500;
+  transition: color .15s, border-color .15s, background .15s;
+}
+.topbar-kassa-link:hover { color: var(--purple); border-color: var(--purple); background: var(--purple-light); }
 .topbar-avatar {
   width: 30px; height: 30px; border-radius: 50%;
   background: var(--surface2); border: 1px solid var(--border-md);
@@ -590,6 +598,7 @@ select.input {
     <span class="bo-text" data-i18n="backoffice">BACKOFFICE</span>
   </div>
   <div class="topbar-right">
+    <a href="kassa.html" class="topbar-kassa-link" data-i18n="link_kassa">Kassavyn →</a>
     <div class="lang-toggle" role="group" aria-label="Language">
       <button type="button" class="lang-btn" data-lang="sv">SV</button>
       <button type="button" class="lang-btn" data-lang="en">EN</button>
@@ -778,6 +787,7 @@ const T = {
     price_label: 'Pris',
     standard_marker: 'standard',
     edit_name_tooltip: 'Klicka för att ändra namn',
+    link_kassa: 'Kassavyn →',
     vat_badge: pct => `${pct}% moms`,
     vat_locked: pct => `Låst till ${pct}% moms`,
     vat_mismatch_tooltip: pct => `${pct}% moms – kan inte blandas i samma del`,
@@ -838,6 +848,7 @@ const T = {
     price_label: 'Price',
     standard_marker: 'default',
     edit_name_tooltip: 'Click to rename',
+    link_kassa: 'Register view →',
     vat_badge: pct => `${pct}% VAT`,
     vat_locked: pct => `Locked to ${pct}% VAT`,
     vat_mismatch_tooltip: pct => `${pct}% VAT — can't mix in the same part`,
