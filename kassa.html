@@ -114,7 +114,7 @@ body {
 .cart {
   width: var(--cart-w); flex-shrink: 0;
   background: var(--surface);
-  border-right: 1px solid var(--border);
+  border-left: 1px solid var(--border);
   display: flex; flex-direction: column;
 }
 .cart-header {
@@ -450,11 +450,11 @@ body {
   border-radius: var(--radius-pill); padding: 2px 8px;
 }
 
-/* Responsive — stack on small screens */
+/* Responsive — stack on small screens (cart drops below the article grid) */
 @media (max-width: 880px) {
   .main { flex-direction: column; }
   .cart {
-    width: 100%; border-right: none; border-bottom: 1px solid var(--border);
+    width: 100%; border-left: none; border-top: 1px solid var(--border);
     max-height: 40vh;
   }
 }
@@ -491,6 +491,12 @@ body {
 
 <!-- MAIN -->
 <div class="main">
+  <!-- ARTICLES -->
+  <div class="articles">
+    <div class="cat-tabs" id="catTabs"></div>
+    <div class="article-grid" id="articleGrid"></div>
+  </div>
+
   <!-- CART -->
   <div class="cart">
     <div class="cart-header">
@@ -519,12 +525,6 @@ body {
         <button class="btn btn-primary" id="payBtn" onclick="pay()" data-i18n="pay">Betala</button>
       </div>
     </div>
-  </div>
-
-  <!-- ARTICLES -->
-  <div class="articles">
-    <div class="cat-tabs" id="catTabs"></div>
-    <div class="article-grid" id="articleGrid"></div>
   </div>
 </div>
 
