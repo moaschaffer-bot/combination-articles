@@ -533,20 +533,115 @@ select.input {
 }
 @keyframes slideIn { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
 
-/* SAVED */
-.saved-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 2rem;
-  max-width: 860px; text-align: center;
+/* PAGE HEADER ACTION (e.g. "+ New combination") */
+.page-header-row { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+.page-header-row .page-title-block { flex: 1; min-width: 0; }
+.page-header-row .page-action { flex-shrink: 0; }
+
+/* LIST VIEW — table of saved combinations */
+.list-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  max-width: 1040px;
+  overflow: hidden;
 }
-.saved-icon-wrap {
-  width: 48px; height: 48px; border-radius: 50%;
-  background: var(--green-bg); border: 1px solid var(--green-border);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 1rem; font-size: 20px;
+.combos-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
 }
-.saved-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: .375rem; }
-.saved-sub { font-size: 13px; color: var(--text-2); margin-bottom: 1.5rem; }
+.combos-table thead th {
+  text-align: left;
+  font-size: 11px; font-weight: 600;
+  color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .07em;
+  padding: .75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.combos-table thead th.num { text-align: right; }
+.combos-table tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background .1s;
+}
+.combos-table tbody tr:last-child { border-bottom: none; }
+.combos-table tbody tr:hover { background: var(--surface2); }
+.combos-table tbody td {
+  padding: .875rem 1rem;
+  vertical-align: middle;
+}
+.combos-table tbody td.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+.combos-table .combo-name { font-weight: 600; color: var(--text); }
+.combos-table .combo-parts {
+  font-size: 12px; color: var(--text-2);
+  margin-top: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 320px;
+}
+.combos-table .row-actions {
+  display: flex; gap: .25rem; justify-content: flex-end;
+}
+.combos-table .row-action-btn {
+  width: 28px; height: 28px;
+  border: 1px solid transparent;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer; color: var(--text-2);
+  display: inline-flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: background .1s, border-color .1s, color .1s;
+}
+.combos-table .row-action-btn:hover {
+  background: var(--surface);
+  border-color: var(--border-md);
+  color: var(--text);
+}
+.combos-table .row-action-btn.danger:hover {
+  color: #B5273C;
+  border-color: rgba(181,39,60,0.3);
+  background: #FCEEF0;
+}
+
+.combos-table tbody tr.confirming {
+  background: #FCEEF0;
+}
+.combos-table tbody tr.confirming td {
+  border-bottom-color: rgba(181,39,60,0.2);
+}
+.confirm-inline {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-size: 12px; color: #B5273C; font-weight: 500;
+}
+.confirm-inline .btn-danger {
+  background: #B5273C; color: #fff;
+  height: 28px; padding: 0 12px;
+  border-radius: var(--radius-sm); border: none;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  font-family: inherit;
+}
+.confirm-inline .btn-danger:hover { background: #8E1E2F; }
+
+.list-empty {
+  padding: 3rem 1rem;
+  text-align: center;
+}
+.list-empty-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: .375rem; }
+.list-empty-hint { font-size: 13px; color: var(--text-2); margin-bottom: 1.25rem; }
+
+.pill-tiny {
+  display: inline-block;
+  font-size: 10px; padding: 1px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface2); color: var(--text-2);
+  border: 1px solid var(--border);
+  font-weight: 500;
+  letter-spacing: .02em;
+}
 
 .proto-badge {
   display: inline-flex; align-items: center; gap: .375rem;
@@ -675,22 +770,54 @@ select.input {
 <!-- CONTENT -->
 <div class="content">
   <div class="page-header">
-    <div class="breadcrumb">
-      <a data-i18n="nav_articles">Articles</a> <span>›</span> <span data-i18n="page_title">Ny kombinationsartikel</span>
+    <div class="breadcrumb" id="breadcrumb">
+      <a data-i18n="nav_articles">Articles</a> <span>›</span>
+      <a id="breadcrumbList" onclick="goToList()" data-i18n="page_title_list">Kombinationsartiklar</a>
+      <span id="breadcrumbCurrentSep" style="display:none">›</span>
+      <span id="breadcrumbCurrent" style="display:none"></span>
     </div>
-    <div style="display:flex;align-items:center;flex-wrap:wrap;gap:.75rem">
-      <h1 class="page-title" data-i18n="page_title">Ny kombinationsartikel</h1>
-      <span class="proto-badge">● <span data-i18n="badge_prototype">Prototyp</span></span>
-      <div class="proto-toggle" role="group" aria-label="VAT model">
-        <span class="proto-toggle-label" data-i18n="vat_model_label">Moms:</span>
-        <button type="button" class="proto-toggle-btn" data-vat-model="locked" data-i18n="vat_model_locked">Låst per del</button>
-        <button type="button" class="proto-toggle-btn" data-vat-model="checkout" data-i18n="vat_model_checkout">Vid beställning</button>
+    <div class="page-header-row">
+      <div class="page-title-block" style="display:flex;align-items:center;flex-wrap:wrap;gap:.75rem">
+        <h1 class="page-title" id="pageTitle" data-i18n="page_title_list">Kombinationsartiklar</h1>
+        <span class="proto-badge">● <span data-i18n="badge_prototype">Prototyp</span></span>
+        <div class="proto-toggle" role="group" aria-label="VAT model">
+          <span class="proto-toggle-label" data-i18n="vat_model_label">Moms:</span>
+          <button type="button" class="proto-toggle-btn" data-vat-model="locked" data-i18n="vat_model_locked">Låst per del</button>
+          <button type="button" class="proto-toggle-btn" data-vat-model="checkout" data-i18n="vat_model_checkout">Vid beställning</button>
+        </div>
+      </div>
+      <div class="page-action" id="pageAction">
+        <button class="btn btn-primary" onclick="goToCreate()" data-i18n="new_combination_btn">+ Ny kombinationsartikel</button>
       </div>
     </div>
   </div>
 
   <div id="toastArea"></div>
-  <div id="savedArea" style="display:none"></div>
+
+  <!-- LIST VIEW -->
+  <div id="listView">
+    <div class="list-card">
+      <table class="combos-table" id="combosTable">
+        <thead>
+          <tr>
+            <th data-i18n="col_name">Namn</th>
+            <th data-i18n="col_category">Kassekategori</th>
+            <th data-i18n="col_receipt">Kvittovisning</th>
+            <th class="num" data-i18n="col_parts_count">Delar</th>
+            <th class="num" data-i18n="col_total">Totalt</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="combosTbody"></tbody>
+      </table>
+      <div id="listEmpty" class="list-empty" style="display:none">
+        <div class="list-empty-title" data-i18n="list_empty_title">Inga kombinationsartiklar än</div>
+        <div class="list-empty-hint" data-i18n="list_empty_hint">Skapa din första för att se den här.</div>
+        <button class="btn btn-primary" onclick="goToCreate()" data-i18n="new_combination_btn">+ Ny kombinationsartikel</button>
+      </div>
+    </div>
+  </div>
+  <!-- /LIST VIEW -->
 
   <div class="card" id="mainCard">
     <div class="field-row">
@@ -737,7 +864,7 @@ select.input {
     </div>
 
     <div class="form-actions">
-      <button class="btn btn-ghost" onclick="resetAll()" data-i18n="cancel">Avbryt</button>
+      <button class="btn btn-ghost" onclick="goToList()" data-i18n="cancel">Avbryt</button>
       <button class="btn btn-primary" id="saveBtn" onclick="saveCombo()" data-i18n="save" disabled>Spara kombinationsartikel</button>
     </div>
   </div>
@@ -754,6 +881,28 @@ const T = {
     nav_company: 'Företag', nav_settings: 'Inställningar', nav_finance: 'Ekonomi',
     nav_storage: 'Lager', nav_tables: 'Bordshantering', nav_help: 'Hjälpcenter',
     page_title: 'Ny kombinationsartikel',
+    page_title_list: 'Kombinationsartiklar',
+    page_title_edit: name => `Redigera ${name}`,
+    new_combination_btn: '+ Ny kombinationsartikel',
+    col_name: 'Namn',
+    col_category: 'Kassekategori',
+    col_receipt: 'Kvittovisning',
+    col_parts_count: 'Delar',
+    col_total: 'Totalt',
+    list_empty_title: 'Inga kombinationsartiklar än',
+    list_empty_hint: 'Skapa din första för att se den här.',
+    edit: 'Redigera',
+    delete: 'Ta bort',
+    confirm_delete: name => `Ta bort "${name}"?`,
+    confirm_delete_yes: 'Ta bort',
+    confirm_delete_cancel: 'Avbryt',
+    receipt_total_short: 'Totalpris',
+    receipt_itemized_short: 'Per del',
+    no_category: '—',
+    parts_concat: parts => parts.join(' · '),
+    toast_combo_saved: name => `${name} sparad`,
+    toast_combo_updated: name => `${name} uppdaterad`,
+    toast_combo_deleted: name => `${name} borttagen`,
     badge_prototype: 'Prototyp',
     field_name: 'Namn',
     field_category: 'Kassekategori',
@@ -815,6 +964,28 @@ const T = {
     nav_company: 'Company', nav_settings: 'Settings', nav_finance: 'Finance',
     nav_storage: 'Storage', nav_tables: 'Table management', nav_help: 'Help center',
     page_title: 'New combination article',
+    page_title_list: 'Combination articles',
+    page_title_edit: name => `Edit ${name}`,
+    new_combination_btn: '+ New combination article',
+    col_name: 'Name',
+    col_category: 'Display category',
+    col_receipt: 'Price on receipt',
+    col_parts_count: 'Parts',
+    col_total: 'Total',
+    list_empty_title: 'No combination articles yet',
+    list_empty_hint: 'Create your first one to see it here.',
+    edit: 'Edit',
+    delete: 'Delete',
+    confirm_delete: name => `Delete "${name}"?`,
+    confirm_delete_yes: 'Delete',
+    confirm_delete_cancel: 'Cancel',
+    receipt_total_short: 'Total price',
+    receipt_itemized_short: 'Per part',
+    no_category: '—',
+    parts_concat: parts => parts.join(' · '),
+    toast_combo_saved: name => `${name} saved`,
+    toast_combo_updated: name => `${name} updated`,
+    toast_combo_deleted: name => `${name} deleted`,
     badge_prototype: 'Prototype',
     field_name: 'Name',
     field_category: 'Display category',
@@ -943,6 +1114,49 @@ let vatModel = localStorage.getItem('vatModel') || 'checkout';
 let steps = [];
 const stepName = s => lang === 'sv' ? s.nameSv : s.nameEn;
 
+/**
+ * View state: 'list' shows the saved combinations table; 'form' shows the
+ * create/edit form (#mainCard). editingId holds the combo being edited (or
+ * null for a new one).
+ */
+let view = 'list';
+let editingId = null;
+
+const STORAGE_KEY = 'combinations';
+function loadCombos() {
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); }
+  catch (_) { return []; }
+}
+function saveCombos(arr) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+}
+
+/** Seed one example combination on first load so the list isn't empty. */
+function maybeSeed() {
+  if (localStorage.getItem(STORAGE_KEY) !== null) return;
+  const seed = [{
+    id: String(Date.now()),
+    name: 'Stora menyn',
+    category: 'Menyer',
+    receiptMode: 'itemized',
+    parts: [
+      { nameSv: 'Förrätt',  nameEn: 'Starter', selected: [10,11,12],   defaultId: 10, price: 80  },
+      { nameSv: 'Varmrätt', nameEn: 'Main',    selected: [14,15,16,17], defaultId: 14, price: 150 },
+      { nameSv: 'Dessert',  nameEn: 'Dessert', selected: [18,19],       defaultId: 18, price: 60  },
+    ],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }];
+  saveCombos(seed);
+}
+maybeSeed();
+let savedCombos = loadCombos();
+
+function comboTotalPrice(combo) {
+  return (combo.parts || []).reduce((s, p) => s + (p.price || 0), 0);
+}
+function comboName(combo) { return combo.name || ''; }
+
 function fmtPrice(p) {
   return (p || 0) + ' kr';
 }
@@ -963,11 +1177,95 @@ function renderAll() {
   // vat-model toggle active state
   document.querySelectorAll('.proto-toggle-btn').forEach(b =>
     b.classList.toggle('active', b.dataset.vatModel === vatModel));
-  // steps list + empty/total visibility
-  renderSteps();
-  renderTotal();
-  renderLayoutVisibility();
-  updateSaveBtn();
+  renderViewSwitch();
+  if (view === 'list') {
+    renderList();
+  } else {
+    // steps list + empty/total visibility
+    renderSteps();
+    renderTotal();
+    renderLayoutVisibility();
+    updateSaveBtn();
+  }
+}
+
+/** Show/hide list vs form, update header copy and breadcrumb. */
+function renderViewSwitch() {
+  const isList = view === 'list';
+  document.getElementById('listView').style.display = isList ? 'block' : 'none';
+  document.getElementById('mainCard').style.display = isList ? 'none' : 'block';
+  document.getElementById('pageAction').style.display = isList ? 'block' : 'none';
+
+  const title = document.getElementById('pageTitle');
+  const crumbCurrent = document.getElementById('breadcrumbCurrent');
+  const crumbSep = document.getElementById('breadcrumbCurrentSep');
+
+  if (isList) {
+    title.textContent = t('page_title_list');
+    crumbCurrent.style.display = 'none';
+    crumbSep.style.display = 'none';
+  } else {
+    if (editingId) {
+      const c = savedCombos.find(x => x.id === editingId);
+      const name = c ? c.name : '';
+      title.textContent = t('page_title_edit', name);
+      crumbCurrent.textContent = name;
+    } else {
+      title.textContent = t('page_title');
+      crumbCurrent.textContent = t('page_title');
+    }
+    crumbCurrent.style.display = 'inline';
+    crumbSep.style.display = 'inline';
+  }
+}
+
+function renderList() {
+  const tbody = document.getElementById('combosTbody');
+  const empty = document.getElementById('listEmpty');
+  const table = document.getElementById('combosTable');
+
+  if (savedCombos.length === 0) {
+    table.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  table.style.display = '';
+  empty.style.display = 'none';
+
+  tbody.innerHTML = savedCombos.map(c => {
+    const partNames = (c.parts || []).map(p => lang === 'sv' ? p.nameSv : p.nameEn);
+    const partsLabel = t('parts_concat', partNames);
+    const receipt = c.receiptMode === 'total'
+      ? t('receipt_total_short')
+      : t('receipt_itemized_short');
+    const cat = c.category || `<span style="color:var(--text-3)">${t('no_category')}</span>`;
+    return `
+      <tr id="row-${c.id}">
+        <td>
+          <div class="combo-name">${escapeHtml(c.name)}</div>
+          <div class="combo-parts" title="${escapeHtml(partNames.join(' · '))}">${escapeHtml(partsLabel)}</div>
+        </td>
+        <td>${cat}</td>
+        <td><span class="pill-tiny">${receipt}</span></td>
+        <td class="num">${(c.parts || []).length}</td>
+        <td class="num">${fmtPrice(comboTotalPrice(c))}</td>
+        <td>
+          <div class="row-actions">
+            <button class="row-action-btn" title="${t('edit')}" onclick="goToEdit('${c.id}')" aria-label="${t('edit')}">✎</button>
+            <button class="row-action-btn danger" title="${t('delete')}" onclick="askDelete('${c.id}')" aria-label="${t('delete')}">🗑</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function escapeHtml(s) {
+  return String(s ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 function renderLayoutVisibility() {
@@ -1367,19 +1665,122 @@ function showToast(msg) {
   setTimeout(() => toast.remove(), 3000);
 }
 
+/**
+ * Build a serializable combo object from the form's current state.
+ * `selected` is stored as an array (Sets don't survive JSON.stringify).
+ */
+function comboFromForm() {
+  const name = document.getElementById('comboName').value.trim();
+  const category = document.getElementById('categorySelect').value;
+  const receiptMode = document.getElementById('receiptMode').value;
+  const parts = steps.map(s => ({
+    nameSv: s.nameSv, nameEn: s.nameEn,
+    selected: [...s.selected],
+    defaultId: s.defaultId,
+    price: s.price || 0,
+  }));
+  return { name, category, receiptMode, parts };
+}
+
 function saveCombo() {
   if (!isValid()) return;
-  const name = document.getElementById('comboName').value.trim();
-  document.getElementById('mainCard').style.display = 'none';
-  const area = document.getElementById('savedArea');
-  area.style.display = 'block';
-  area.innerHTML = `
-    <div class="saved-card">
-      <div class="saved-icon-wrap">✓</div>
-      <div class="saved-title">${t('saved_title', name)}</div>
-      <div class="saved-sub">${t('saved_sub')}</div>
-      <button class="btn btn-primary" onclick="resetAll()">${t('create_new')}</button>
+  const data = comboFromForm();
+  const now = new Date().toISOString();
+  if (editingId) {
+    const idx = savedCombos.findIndex(c => c.id === editingId);
+    if (idx !== -1) {
+      savedCombos[idx] = { ...savedCombos[idx], ...data, updatedAt: now };
+    }
+    saveCombos(savedCombos);
+    showToast(t('toast_combo_updated', data.name));
+  } else {
+    const newCombo = { id: String(Date.now()), createdAt: now, updatedAt: now, ...data };
+    savedCombos.push(newCombo);
+    saveCombos(savedCombos);
+    showToast(t('toast_combo_saved', data.name));
+  }
+  goToList();
+}
+
+/* ---------- list view interactions ---------- */
+function goToList() {
+  view = 'list';
+  editingId = null;
+  // reset form state so re-entering create flow starts blank
+  steps = [];
+  resetFormFields();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function goToCreate() {
+  view = 'form';
+  editingId = null;
+  steps = [];
+  resetFormFields();
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function goToEdit(id) {
+  const combo = savedCombos.find(c => c.id === id);
+  if (!combo) return;
+  view = 'form';
+  editingId = id;
+  // hydrate form from saved combo
+  document.getElementById('comboName').value = combo.name || '';
+  document.getElementById('categorySelect').value = combo.category || '';
+  document.getElementById('receiptMode').value = combo.receiptMode || 'itemized';
+  steps = (combo.parts || []).map(p => ({
+    nameSv: p.nameSv, nameEn: p.nameEn,
+    selected: new Set(p.selected || []),
+    defaultId: p.defaultId,
+    price: p.price || 0,
+    search: '', group: '',
+    open: false, isNew: false,
+  }));
+  renderAll();
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function resetFormFields() {
+  const nameInput = document.getElementById('comboName');
+  if (nameInput) nameInput.value = '';
+  const cat = document.getElementById('categorySelect');
+  if (cat) cat.value = '';
+  const rm = document.getElementById('receiptMode');
+  if (rm) rm.value = 'itemized';
+}
+
+/** Inline two-step delete: first click swaps the row to a confirm cell. */
+function askDelete(id) {
+  const combo = savedCombos.find(c => c.id === id);
+  if (!combo) return;
+  const row = document.getElementById('row-' + id);
+  if (!row) return;
+  row.classList.add('confirming');
+  // Replace the actions cell with a confirm prompt; everything else stays.
+  const actionsCell = row.lastElementChild;
+  actionsCell.innerHTML = `
+    <div class="confirm-inline">
+      <span>${escapeHtml(t('confirm_delete', combo.name))}</span>
+      <button class="btn-danger" onclick="confirmDelete('${id}')">${t('confirm_delete_yes')}</button>
+      <button class="row-action-btn" onclick="cancelDelete('${id}')" aria-label="${t('confirm_delete_cancel')}">×</button>
     </div>`;
+}
+
+function cancelDelete(id) {
+  // Re-render the list to drop the confirm UI cleanly.
+  renderList();
+}
+
+function confirmDelete(id) {
+  const combo = savedCombos.find(c => c.id === id);
+  if (!combo) return;
+  savedCombos = savedCombos.filter(c => c.id !== id);
+  saveCombos(savedCombos);
+  showToast(t('toast_combo_deleted', combo.name));
+  renderList();
 }
 
 function resetAll() { location.reload(); }
