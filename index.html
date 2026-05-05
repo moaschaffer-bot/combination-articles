@@ -437,11 +437,27 @@ select.input {
 }
 
 .picker-footer {
-  display: flex; align-items: center; justify-content: space-between;
+  display: flex; align-items: center; gap: .75rem;
   margin-top: .75rem; padding-top: .75rem;
   border-top: 1px solid var(--border);
 }
-.footer-count { font-size: 12px; color: var(--text-2); }
+.footer-count { font-size: 12px; color: var(--text-2); flex: 1; text-align: center; }
+.remove-part-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-3);
+  font-size: 12px; font-weight: 500;
+  height: 28px; padding: 0 10px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-family: inherit;
+  transition: color .1s, background .1s, border-color .1s;
+}
+.remove-part-btn:hover {
+  color: #B5273C;
+  background: #FCEEF0;
+  border-color: rgba(181,39,60,0.25);
+}
 
 /* NEW STEP BODY */
 .new-step-body { padding: 1rem; background: var(--surface); }
@@ -920,6 +936,7 @@ const T = {
     part_name_placeholder: 'T.ex. Dryck, Tillbehör...',
     part_hint: 'Visas i kassan och på köksbongen.',
     choose_items: 'Välj artiklar',
+    remove_part: 'Ta bort del',
     search_placeholder: 'Sök artikel...',
     group_all: 'Varugrupp: Alla',
     group_prefix: 'Varugrupp: ',
@@ -1003,6 +1020,7 @@ const T = {
     part_name_placeholder: 'E.g. Drink, Side...',
     part_hint: 'Shown at the register and on the kitchen chit.',
     choose_items: 'Choose articles',
+    remove_part: 'Remove part',
     search_placeholder: 'Search article...',
     group_all: 'Product group: All',
     group_prefix: 'Product group: ',
@@ -1279,7 +1297,6 @@ function isValid() {
   const name = document.getElementById('comboName').value.trim();
   if (!name) return false;
   if (steps.length === 0) return false;
-  if (steps.some(s => s.isNew)) return false;
   return steps.every(s => s.selected.size > 0 && (s.price || 0) > 0);
 }
 
@@ -1296,29 +1313,8 @@ function renderSteps() {
 
 function buildStepBlock(step, idx) {
   const block = document.createElement('div');
-  block.className = 'step-block' + (step.open ? ' active' : '') + (step.isNew ? ' new-step' : '');
+  block.className = 'step-block' + (step.open ? ' active' : '');
   block.id = 'step-' + idx;
-
-  if (step.isNew) {
-    block.innerHTML = `
-      <div class="step-header new-header">
-        <span class="drag-handle" style="opacity:.2">⠿</span>
-        <div class="step-num purple">${idx + 1}</div>
-        <span class="step-name purple-text">${t('new_part')}</span>
-      </div>
-      <div class="new-step-body">
-        <div class="name-row">
-          <span class="name-label">${t('part_name_label')}</span>
-          <input class="name-input" type="text" id="newStepName" placeholder="${t('part_name_placeholder')}">
-        </div>
-        <div class="field-hint">${t('part_hint')}</div>
-        <div class="new-btns">
-          <button class="btn btn-primary btn-sm" onclick="confirmNewStep(${idx})">${t('choose_items')}</button>
-          <button class="btn btn-ghost btn-sm" onclick="cancelNewStep(${idx})">${t('cancel')}</button>
-        </div>
-      </div>`;
-    return block;
-  }
 
   // header
   const count = step.selected.size;
@@ -1392,6 +1388,7 @@ function renderPickerInner(step, idx) {
     </div>
     <div class="article-list" id="alist-${idx}"></div>
     <div class="picker-footer">
+      <button type="button" class="remove-part-btn" onclick="removeStep(${idx})">${t('remove_part')}</button>
       <span class="footer-count" id="fcount-${idx}"></span>
       <button class="btn btn-primary btn-sm" id="doneBtn-${idx}" onclick="closePicker(${idx})">${t('done')}</button>
     </div>`;
@@ -1602,7 +1599,6 @@ function commitEditName(idx, input) {
 }
 
 function toggleStep(idx) {
-  if (steps.some(s => s.isNew)) return;
   steps[idx].open = !steps[idx].open;
   renderSteps();
   renderTotal();
@@ -1619,40 +1615,35 @@ function closePicker(idx) {
   updateSaveBtn();
 }
 
+/**
+ * A part is added directly in its expanded form (one visual state) so the
+ * user can name it, set a price, and pick articles in one place. The name
+ * is auto-opened for inline editing so they can start typing immediately.
+ * Cancel/Remove is always available via the Remove part button in the footer.
+ */
 function showNewStep() {
-  if (steps.some(s => s.isNew)) return;
-  document.getElementById('addStepBtn').classList.add('disabled');
+  const defaultName = t('new_part');
   steps.push({
-    nameSv: t('new_part'), nameEn: t('new_part'),
+    nameSv: defaultName, nameEn: defaultName,
     selected: new Set(), defaultId: null, price: 0,
-    search: '', group: '', open: false, isNew: true
+    search: '', group: '', open: true, isNew: false,
   });
+  const newIdx = steps.length - 1;
   renderSteps();
   renderLayoutVisibility();
   updateSaveBtn();
-  setTimeout(() => { const n = document.getElementById('newStepName'); if (n) n.focus(); }, 50);
+  bindPickerEvents(newIdx);
+  // Auto-open inline name edit so the user can rename right away.
+  setTimeout(() => {
+    startEditName({ stopPropagation: () => {} }, newIdx);
+  }, 60);
 }
 
-function confirmNewStep(idx) {
-  const input = document.getElementById('newStepName');
-  const name = (input ? input.value.trim() : '') || t('new_part');
-  const s = steps[idx];
-  // same name in both languages until user switches
-  s.nameSv = name; s.nameEn = name;
-  s.isNew = false;
-  s.open = true;
-  document.getElementById('addStepBtn').classList.remove('disabled');
-  renderSteps();
-  renderLayoutVisibility();
-  updateSaveBtn();
-  bindPickerEvents(idx);
-}
-
-function cancelNewStep(idx) {
+function removeStep(idx) {
   steps.splice(idx, 1);
-  document.getElementById('addStepBtn').classList.remove('disabled');
   renderSteps();
   renderLayoutVisibility();
+  renderTotal();
   updateSaveBtn();
 }
 
